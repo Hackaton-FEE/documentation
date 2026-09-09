@@ -22,6 +22,7 @@ Analizar a profundidad las misiones, visiones, principios rectores y valores cor
 | **API Contract (OpenAPI 3.1)** | 🔌 [**`especificacion-api-openapi.md`**](./especificacion-api-openapi.md) | **Especificación de APIs y Contratos:** Endpoints REST/JSON para escaneos Osisn't, ingesta Share Sheet, firma biométrica LPOA y seguimiento de desindexación Google/Meta. |
 | **Data Model & Privacy** | 🗄️ [**`modelo-datos-y-privacidad-erd.md`**](./modelo-datos-y-privacidad-erd.md) | **Modelo de Datos y ERD:** Esquema relacional en PostgreSQL/Supabase, diccionario de datos, retención efímera de 48h y almacenamiento Zero-Knowledge. |
 | **QA & Security (ISO 29119)** | 🧪 [**`plan-pruebas-qa-seguridad.md`**](./plan-pruebas-qa-seguridad.md) | **Plan de Pruebas y QA:** Pirámide de pruebas automatizadas, mocks para APIs de OSINT, matriz de seguridad OWASP Mobile & API Top 10 y checklist para el Demo. |
+| **Auth & FIDO2 (WebAuthn)** | 🔑 [**`estrategia-autenticacion-passkeys-biometria.md`**](./estrategia-autenticacion-passkeys-biometria.md) | **Estrategia de Autenticación:** Passkeys (FIDO2), biometría en Secure Enclave, bóveda de hardware y onboarding progresivo (cero cuentas para Osisn't). |
 
 ---
 
