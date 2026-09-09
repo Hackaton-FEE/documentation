@@ -1,13 +1,13 @@
-# Idea Central y Propuesta: Plataforma de Defensa de Reputacion, Desindexacion y Borrado de Huella Digital
+# Idea Central y Propuesta: Aplicacion Movil de Defensa de Reputacion, Desindexacion y Borrado de Huella Digital
 
-> **Documento Central de Trabajo:** Este archivo sirve como la propuesta rectora y arquitectura conceptual del proyecto. Sera actualizado, refinado y perfeccionado iterativamente a medida que avancemos en la definicion de la herramienta.
+> **Documento Central de Trabajo:** Este archivo sirve como la propuesta rectora y arquitectura conceptual del proyecto. Ha sido ajustado formalmente para conceptualizar la solucion como una **Aplicacion Movil (iOS / Android)**, aprovechando las capacidades nativas del smartphone (Share Sheet, biometria, camara, push notifications y computo local zero-knowledge).
 
 ---
 
 ## 1. El Problema Real del Usuario Final y la Asimetria de Poder
 
 Hoy en dia, un individuo común o un profesionista enfrenta una vulnerabilidad abrumadora:
-1. **Exposicion Involuntaria:** Filtracion de datos personales (*doxxing*), aparicion de fotos/videos no consentidos, contenido difamatorio en redes sociales (Facebook, Instagram, X, TikTok) o registros en buscadores de personas (*data brokers*).
+1. **Exposicion Involuntaria en el Smartphone:** En mas del 90% de los casos, la victima descubre una filtracion personal (*doxxing*), fotos/videos no consentidos o campanas de difamacion mientras navega en redes sociales (Instagram, TikTok, Facebook, X, WhatsApp) **directamente desde su telefono movil**.
 2. **Dano Reputacional Inmediato:** Una busqueda en Google con contenido danino puede destruir la carrera profesional, las finanzas o la vida personal de una persona en cuestion de horas.
 3. **El Calvario Burocratico (Dias a Semanas):**
    * Las grandes plataformas tecnologicas (**Big Tech**) no cuentan con una "API publica de borrado" para usuarios.
@@ -160,54 +160,56 @@ graph TD
    * **Herramientas:** Base de datos de código abierto de `datenanfragen/data` y repositorio `The-Osint-Toolbox/Privacy-Opt-Out`.
    * **Funcion:** Directorio con más de 2,000 correos de contacto directo de Oficiales de Protección de Datos (DPO) y formularios de opt-out sin tener que investigar uno por uno.
 
-### B. Apartado Tecnologico (APIs & Bibliotecas Existentes)
+### C. Superpoderes y Capacidades Nativas de la Aplicacion Movil (La Gran Ventaja Competitiva)
 
-1. **Sellado de Tiempo Criptografico e Inmutable (Prueba Forense):**
-   * **Herramientas:** `python-opentimestamps` (`ots`) y `Wayback Machine API (Save Page Now)`.
-   * **Funcion:** Ancla el hash SHA-256 de la captura de pantalla y del HTML de la URL infractora en la blockchain de Bitcoin de forma gratuita. Proporciona una prueba matemática irrefutable de existencia previa ante cualquier juzgado.
-2. **Hashing Perceptual para Imagenes/Videos No Consentidos:**
-   * **Herramientas:** Biblioteca Python `imagehash` (algoritmos pHash y dHash) e integración con los estándares de `StopNCII.org` / `PhotoDNA`.
-   * **Funcion:** Genera una huella digital única de la fotografía en el cliente sin que la imagen sensible viaje por servidores externos, permitiendo rastrear duplicados o solicitar bloqueos preventivos de subida en redes sociales.
-3. **Auditoria y Scraping de Resultados de Busqueda (SERPs):**
-   * **Herramientas:** `SerpApi`, `ValueSERP` o `ZenRows`.
-   * **Funcion:** Consulta programática limpia a Google Search para monitorear si una palabra clave, nombre o URL infractora sigue apareciendo en los primeros 100 resultados de búsqueda o si ya fue purgada.
-4. **Automatizacion de Navegacion Web Evasiva (Headless Browsers):**
-   * **Herramientas:** `Playwright` o `Puppeteer` con `playwright-stealth`.
-   * **Funcion:** Simula un navegador real para rellenar de forma asistida los formularios web de Google Legal y Meta Defamation que carecen de API REST pública, eludiendo bloqueos de Cloudflare y WAF.
-5. **Deteccion de Huella Previa (OSINT Core):**
-   * **Herramientas:** `Holehe` (como microservicio Python para escaneo de email) y `Sherlock` (para rastreo de alias).
+El giro hacia una **aplicacion movil nativa (iOS / Android)** transforma radicalmente la experiencia y resuelve el mayor obstaculo en situaciones de crisis:
+
+1. **Integracion con el "Share Sheet" Nativo (Compartir en...):**
+   * *El problema:* En la web, el usuario tiene que copiar un enlace largo en Instagram/TikTok, abrir un navegador, iniciar sesion y pegarlo.
+   * *La solucion movil:* El usuario esta en Instagram, TikTok o Facebook, ve el contenido difamatorio, toca **"Compartir" -> Selecciona el icono de la App**.
+   * Mediante una extension nativa (*iOS Share Extension* / *Android Send Intent*), la app intercepta la URL al instante, extrae el identificador del post y activa el caso sin salir de la red social.
+2. **Zero-Knowledge Image Hashing Local (Privacidad Absoluta):**
+   * Cuando una persona es victima de imagenes intimas no consentidas (NCII) o extorsion, **siente terror de subir la foto a la nube de un tercero**.
+   * En la app movil, el algoritmo de *Perceptual Hashing* (pHash / PhotoDNA) se ejecuta **directamente en el procesador del smartphone**. La imagen sensible nunca sale del dispositivo; solo viaja el hash matematico cifrado para cotejar y solicitar el bloqueo.
+3. **Firma Tactil y Biometria In-App (LPOA en 15 segundos):**
+   * Firma del poder limitado (LPOA) deslizando el dedo o con Face ID / Touch ID mediante `expo-local-authentication` o `react-native-signature-canvas`.
+4. **Push Notifications para Seguimiento de SLAs:**
+   * Notificaciones en tiempo real directo al lockscreen:
+     * ⏱️ *"Meta ha recibido tu requerimiento legal. Plazo perentorio: 15 dias."*
+     * ⚠️ *"Dia 7: Recordatorio formal enviado al Agente Registrado de Google."*
+     * ✅ *"¡Exito! La URL ha sido purgada del indice de Google (confirmado por SERP)."*
 
 ---
 
 ## 6. Modulos Propios que SI se tienen que Implementar (Custom Built)
 
-Todo el software propio a programar se centrará en la **orquestación, la lógica de negocio, la preservación forense y la experiencia de usuario**:
+Todo el software propio a programar se centrará en la **orquestación, la lógica de negocio, la experiencia móvil y la preservación forense**:
 
 ```mermaid
 graph TD
-    User([Usuario en Crisis / Afectado]) --> M1[Módulo 1: Onboarding, KYC & Mandato Digital]
-    M1 --> M2[Módulo 2: Evidence Vault & Sellador Forense]
-    M2 --> M3[Módulo 3: Sintetizador Jurídico y Clasificador]
-    M3 --> M4[Módulo 4: Orquestador de Despacho Multi-Canal]
-    
-    M4 --> D1[Big Tech: Meta & Google Forms Playwright]
-    M4 --> D2[Agentes Registrados: Correo Legal Certificado]
-    M4 --> D3[Data Brokers: Opt-Out Masivo Engine]
+    subgraph Experiencia Móvil del Usuario
+        A[Navegando en Instagram/TikTok/X] -->|Botón Compartir / Share Sheet| B[App Móvil: Interceptor de Enlace]
+        B --> C[Firma Táctil LPOA + Face ID]
+        C --> D[Hashing Local en Dispositivo Zero-Knowledge]
+    end
 
-    D1 --> M5[Módulo 5: Guardián de SLAs & Escalador]
-    D2 --> M5
-    D3 --> M5
+    subgraph Backend & Workers
+        D --> E[Módulo Evidence Vault: Captura & OpenTimestamps]
+        E --> F[Módulo Legal Synthesizer: Plantilla Jurídica Automática]
+        F --> G[Módulo Big Tech Dispatcher: Playwright & Correo Legal]
+        G --> H[Módulo SLA Watchdog: Seguimiento a 7, 14, 30 días]
+        H --> I[Módulo SERP Sentinel: Auditor de Desindexación]
+    end
 
-    M5 --> M6[Módulo 6: Centinela de Desindexación Google]
-    M6 --> UserDashboard([Dashboard de Resolución en Vivo])
+    I -->|Push Notification en Tiempo Real| J[Pantalla de Bloqueo del Usuario]
 ```
 
-### Modulo 1: Onboarding, KYC & Mandato Digital (*Legal Proxy Gateway*)
-* **Que hace:** Proporciona un flujo intuitivo donde el usuario ingresa en un estado de estrés. Permite pegar el enlace infractor o subir la imagen, verificar su identidad en 60 segundos con Stripe/Veriff y estampar su firma táctil en el poder de representación limitado (LPOA).
-* **Por que es propio:** La experiencia de usuario debe ser ultra-simplificada (estilo "botón de pánico") y el documento legal generado debe contener cláusulas dinámicas según el país del usuario.
+### Modulo 1: Cliente Movil & Interceptor Share Sheet (*Mobile Panic Button*)
+* **Que hace:** Aplicacion movil con interfaz minimalista y extension de compartir (*Share Extension*). Permite crear un caso en 3 toques: capturar post, firmar LPOA y despachar escudo legal.
+* **Por que es propio:** Reduce la friccion de 30 minutos a 45 segundos en el momento exacto en que la victima sufre la agresion.
 
 ### Modulo 2: Motor Forense de Captura y Sellado (*Evidence Vault*)
-* **Que hace:** Worker en segundo plano que navega a la URL infractora, realiza un volcado completo de headers, captura de pantalla de resolución completa, renderiza el DOM, calcula el hash SHA-256 y ejecuta `ots stamp` con OpenTimestamps.
+* **Que hace:** Worker en segundo plano que navega a la URL compartida, realiza un volcado completo de headers, captura de pantalla de resolución completa, renderiza el DOM, calcula el hash SHA-256 y ejecuta `ots stamp` con OpenTimestamps en Bitcoin.
 * **Por que es propio:** Debe garantizar la cadena de custodia digital y generar un PDF con dictamen técnico forense que se anexará al reclamo legal.
 
 ### Modulo 3: Sintetizador Juridico y Clasificador de Infracciones (*Legal Matrix Engine*)
@@ -232,25 +234,28 @@ graph TD
 * **Por que es propio:** Este seguimiento automatizado es exactamente lo que ningún usuario hace por falta de tiempo o conocimiento.
 
 ### Modulo 6: Centinela de Desindexacion y Purga de Cache (*SERP De-indexing Sentinel*)
-* **Que hace:** Consulta periódicamente (cada 12-24 horas) mediante SerpApi si el enlace sigue indexado en Google. En paralelo, verifica si el servidor de origen ya arrojó código `404 Not Found`. En cuanto detecta el `404`, somete automáticamente la petición a la herramienta de *Remove Outdated Content* de Google para acelerar la purga de caché.
+* **Que hace:** Consulta periódicamente (cada 12-24 horas) mediante SerpApi si el enlace sigue indexado en Google. En paralelo, verifica si el servidor de origen ya arrojó código `404 Not Found`. En cuanto detecta el `404`, somete automáticamente la petición a la herramienta de *Remove Outdated Content* de Google para acelerar la purga de caché y envia una **Push Notification** de confirmacion al celular.
 * **Por que es propio:** Cierra el ciclo completo: no solo busca la eliminación en la red social, sino que garantiza que desaparezca de los resultados de búsqueda globales.
 
 ---
 
-## 7. Resumen de la Pila Tecnologica Recomendada (Tech Stack)
+## 7. Resumen de la Pila Tecnologica Recomendada (Mobile-First Tech Stack)
 
 | Capa | Tecnologia Propuesta | Justificacion |
 | :--- | :--- | :--- |
-| **Backend & Workers** | Python (FastAPI + Celery / Redis) | Ecosistema ideal para OSINT, OpenTimestamps, imagehash y automatizaciones. |
-| **Automatizacion Web** | Playwright + Playwright-Stealth | Mayor estabilidad y control asíncrono que Selenium para evadir WAFs. |
-| **Firma & KYC** | Stripe Identity + Dropbox Sign API | APIs estables con SDKs probados y cumplimiento legal internacional. |
-| **Base de Datos** | PostgreSQL + Supabase / Redis | Almacenamiento relacional para trazabilidad legal y colas rápidas para workers. |
-| **Frontend / UX** | Next.js (React) + Tailwind CSS | Interfaz moderna, reactiva, accesible y orientada a dispositivos móviles. |
-| **Monitoreo SERP** | SerpApi / ValueSERP | Extracción limpia de rankings de Google sin riesgo de bloqueo de IPs propias. |
+| **Frontend / App Movil** | **React Native (Expo)** o **Flutter** | Soporte multiplataforma (iOS/Android), acceso fluido a Share Sheet y biometria. |
+| **Share Sheet Extension** | iOS Action Extension / Android Send Intent | Permite capturar links de Instagram/TikTok sin abrir la app manualmente. |
+| **Cómputo Local (Zero-Knowledge)** | Criptografia local / pHash en el cliente | La foto sensible se hashea en el dispositivo y nunca se sube a ningun servidor. |
+| **Push Notifications** | Expo Push / Firebase Cloud Messaging (FCM) | Alertas inmediatas en pantalla de bloqueo sobre el avance de los SLAs legales. |
+| **Backend & Workers** | Python (FastAPI + Celery / Redis) | Ecosistema ideal para OSINT, OpenTimestamps, automatizaciones Playwright. |
+| **Automatizacion Web** | Playwright + Playwright-Stealth | Ejecuta el llenado de formularios de Google/Meta en servidores headless. |
+| **Firma & KYC** | Stripe Identity Mobile SDK + Dropbox Sign API | Verificacion biometrica con camara nativa y firma legal LPOA. |
+| **Base de Datos & Auth** | PostgreSQL + Supabase (Auth & Realtime) | Sincronizacion en tiempo real con la app movil mediante WebSockets. |
+| **Monitoreo SERP** | SerpApi / ValueSERP | Auditoria limpia de resultados de Google. |
 
 ---
 
 ## 8. Proximos Puntos a Desarrollar e Iterar
-1. **Definir el Caso de Uso Piloto (MVP):** ¿Con qué caso de uso arrancaremos la prueba de concepto? (Recomendado: Retiro de datos personales / doxxing o difamación en redes con desindexación en Google).
-2. **Estructura del Mandato Legal (LPOA Template):** Redacción del contrato de mandato simplificado.
-3. **Flujo de Pantallas de la UX:** Prototipo del "Botón de Pánico Digital".
+1. **Flujo de Pantallas de la App Movil (UX Onboarding en Crisis):** Definir la navegacion desde que el usuario comparte el link hasta que recibe la confirmacion de envio del reclamo legal.
+2. **Especificacion de la Extension de Compartir (Share Sheet):** Definir como parsear los enlaces de Instagram (posts, reels, stories), TikTok y X/Twitter.
+3. **Estructura del Mandato Legal (LPOA Template para Firma Movil):** Redaccion del clausulado legal simplificado para firma tactil en pantalla.
