@@ -21,6 +21,7 @@ Analizar a profundidad las misiones, visiones, principios rectores y valores cor
 | 📄 [`comparativa-y-sinergias.md`](./comparativa-y-sinergias.md) | Matriz comparativa, convergencias filosoficas, sinergias y conceptos clave unificados para ambas instituciones. |
 | 📄 [`ciberseguridad-finanzas-y-valores.md`](./ciberseguridad-finanzas-y-valores.md) | Analisis y propuesta sobre como la Ciberseguridad y la Seguridad de la Informacion se alinean con la propiedad privada, la privacidad, la resiliencia de negocios y los valores de FEE y la UL. |
 | 📄 [`herramientas-huella-digital.md`](./herramientas-huella-digital.md) | Analisis tecnico de 5 herramientas open-source para busqueda (OSINT) y borrado/mitigacion de huella digital (Sherlock, Holehe, Maigret, Eraser, JustDelete.me). |
+| 📄 [`analisis-tecnico-endpoints-headers-osint.md`](./analisis-tecnico-endpoints-headers-osint.md) | Analisis tecnico profundo sobre el funcionamiento interno de herramientas OSINT, explotacion de endpoints web/APIs y extraccion de inteligencia en cabeceras HTTP. |
 
 ---
 
