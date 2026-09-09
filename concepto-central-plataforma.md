@@ -122,22 +122,135 @@ sequenceDiagram
 
 ---
 
-## 5. Arquitectura Conceptual de la Herramienta Propuesta
+## 5. Mapeo de Tecnologias y APIs Existentes (No reinventar la rueda)
 
-La plataforma se concibe como una aplicacion orientada al usuario final con los siguientes modulos modulares:
+Para construir una plataforma escalable y viable en tiempos de hackathon o desarrollo ágil, se deben apalancar herramientas y APIs ya consolidadas en dos frentes: **Legal/Logístico** y **Tecnológico**.
 
-| Modulo | Nombre Clave | Funcion Principal |
-| :--- | :--- | :--- |
-| **Modulo 1** | **Evidence & URL Vault** | Entrada del usuario (pegar link o foto); captura forense instantanea con hash SHA-256. |
-| **Modulo 2** | **Legal Matrix Engine** | Clasificacion automatica del incidente (Difamacion, Doxxing, Suplantacion, Imagen No Consentida) y seleccion de la via legal optima. |
-| **Modulo 3** | **Big Tech Liaison (Meta/Google)** | Generacion y despacho del paquete de reclamo hacia los canales legales de Meta y Google. |
-| **Modulo 4** | **Data Broker Cleaner** | Integracion de opt-outs masivos hacia corredores de datos personales (estilo Eraser / DeleteMe open-source). |
-| **Modulo 5** | **Radar de Desindexacion & Dashboard** | Seguimiento en tiempo real de los dias transcurridos, estado del ticket y confirmacion automatica de eliminacion en Google. |
+```mermaid
+graph TD
+    subgraph Ecosistema de APIs y Herramientas Existentes
+        subgraph Frente Legal & Logístico
+            L1[Firma de Mandato LPOA: Dropbox Sign / DocuSign / Mifiel]
+            L2[Verificación de Identidad KYC: Stripe Identity / Veriff]
+            L3[Notificación Certificada: Lob API / Correos Certificados eIDAS]
+            L4[Directorio Legal DPO: datenanfragen/data / Privacy-Opt-Out]
+        end
+        subgraph Frente Tecnológico
+            T1[Preservación Forense: OpenTimestamps en Bitcoin / Archive.today]
+            T2[Auditoría SERP: SerpApi / ZenRows / ValueSERP]
+            T3[Hashing Perceptual: imagehash Python / StopNCII / PhotoDNA]
+            T4[Automatización Web: Playwright con Stealth Plugin]
+            T5[Mapeo de Huella OSINT: Holehe / Sherlock / Maigret APIs]
+        end
+    end
+```
+
+### A. Apartado Legal y Logistico (APIs & Herramientas Existentes)
+
+1. **Firma Electronica del Mandato Digital (LPOA):**
+   * **Herramientas:** `Dropbox Sign API (HelloSign)`, `DocuSign API`, o `Mifiel API` (firma electrónica avanzada con constancia de conservación NOM-151 para México/Latam) / `eIDAS` para Europa.
+   * **Funcion:** Permite que el usuario firme legalmente en su teléfono un poder de representación limitado (*Limited Power of Attorney*) en 15 segundos sin imprimir papeles.
+2. **Verificacion de Identidad (KYC Anti-Abuso y Anti-Censura):**
+   * **Herramientas:** `Stripe Identity API`, `Persona API` o `Veriff API`.
+   * **Funcion:** Garantiza que quien solicita el retiro de una foto o dato es verdaderamente el titular legítimo, impidiendo que un atacante use la herramienta para sabotear o censurar a terceras personas.
+3. **Despacho Legal Certificado (Notificaciones Fehascientes):**
+   * **Herramientas:** `Lob API` (para envío físico automatizado de cartas certificadas legales a los Agentes Registrados de Meta y Google en EE.UU.) y proveedores de correo electrónico certificado con fe pública (ej. `Lleida.net API`, `Docaposte` o `Certified Mail APIs`).
+   * **Funcion:** Entrega acuse de recibo legal vinculante que activa los plazos perentorios de respuesta legal (15 a 30 días) bajo amenaza de multas de los reguladores.
+4. **Directorio Colaborativo de Data Brokers y DPOs:**
+   * **Herramientas:** Base de datos de código abierto de `datenanfragen/data` y repositorio `The-Osint-Toolbox/Privacy-Opt-Out`.
+   * **Funcion:** Directorio con más de 2,000 correos de contacto directo de Oficiales de Protección de Datos (DPO) y formularios de opt-out sin tener que investigar uno por uno.
+
+### B. Apartado Tecnologico (APIs & Bibliotecas Existentes)
+
+1. **Sellado de Tiempo Criptografico e Inmutable (Prueba Forense):**
+   * **Herramientas:** `python-opentimestamps` (`ots`) y `Wayback Machine API (Save Page Now)`.
+   * **Funcion:** Ancla el hash SHA-256 de la captura de pantalla y del HTML de la URL infractora en la blockchain de Bitcoin de forma gratuita. Proporciona una prueba matemática irrefutable de existencia previa ante cualquier juzgado.
+2. **Hashing Perceptual para Imagenes/Videos No Consentidos:**
+   * **Herramientas:** Biblioteca Python `imagehash` (algoritmos pHash y dHash) e integración con los estándares de `StopNCII.org` / `PhotoDNA`.
+   * **Funcion:** Genera una huella digital única de la fotografía en el cliente sin que la imagen sensible viaje por servidores externos, permitiendo rastrear duplicados o solicitar bloqueos preventivos de subida en redes sociales.
+3. **Auditoria y Scraping de Resultados de Busqueda (SERPs):**
+   * **Herramientas:** `SerpApi`, `ValueSERP` o `ZenRows`.
+   * **Funcion:** Consulta programática limpia a Google Search para monitorear si una palabra clave, nombre o URL infractora sigue apareciendo en los primeros 100 resultados de búsqueda o si ya fue purgada.
+4. **Automatizacion de Navegacion Web Evasiva (Headless Browsers):**
+   * **Herramientas:** `Playwright` o `Puppeteer` con `playwright-stealth`.
+   * **Funcion:** Simula un navegador real para rellenar de forma asistida los formularios web de Google Legal y Meta Defamation que carecen de API REST pública, eludiendo bloqueos de Cloudflare y WAF.
+5. **Deteccion de Huella Previa (OSINT Core):**
+   * **Herramientas:** `Holehe` (como microservicio Python para escaneo de email) y `Sherlock` (para rastreo de alias).
 
 ---
 
-## 6. Proximos Puntos a Desarrollar e Iterar
-Este documento servira como base para nuestras siguientes definiciones:
-1. **Definicion de Casos de Uso Prioritarios:** ¿Nos enfocaremos primero en personas individuales afectadas por fotos/videos o en profesionistas/ejecutivos atacados por resenas falsas y difamacion?
-2. **Diseno de la Experiencia del Usuario (UX):** ¿Como hacer que una persona en panico/crisis emocional complete el proceso en menos de 3 minutos?
-3. **Mecanismo de Verificacion de Identidad:** ¿Como aseguramos que quien solicita el borrado es el dueno legitimo de los datos y no un atacante intentando censurar a otro?
+## 6. Modulos Propios que SI se tienen que Implementar (Custom Built)
+
+Todo el software propio a programar se centrará en la **orquestación, la lógica de negocio, la preservación forense y la experiencia de usuario**:
+
+```mermaid
+graph TD
+    User([Usuario en Crisis / Afectado]) --> M1[Módulo 1: Onboarding, KYC & Mandato Digital]
+    M1 --> M2[Módulo 2: Evidence Vault & Sellador Forense]
+    M2 --> M3[Módulo 3: Sintetizador Jurídico y Clasificador]
+    M3 --> M4[Módulo 4: Orquestador de Despacho Multi-Canal]
+    
+    M4 --> D1[Big Tech: Meta & Google Forms Playwright]
+    M4 --> D2[Agentes Registrados: Correo Legal Certificado]
+    M4 --> D3[Data Brokers: Opt-Out Masivo Engine]
+
+    D1 --> M5[Módulo 5: Guardián de SLAs & Escalador]
+    D2 --> M5
+    D3 --> M5
+
+    M5 --> M6[Módulo 6: Centinela de Desindexación Google]
+    M6 --> UserDashboard([Dashboard de Resolución en Vivo])
+```
+
+### Modulo 1: Onboarding, KYC & Mandato Digital (*Legal Proxy Gateway*)
+* **Que hace:** Proporciona un flujo intuitivo donde el usuario ingresa en un estado de estrés. Permite pegar el enlace infractor o subir la imagen, verificar su identidad en 60 segundos con Stripe/Veriff y estampar su firma táctil en el poder de representación limitado (LPOA).
+* **Por que es propio:** La experiencia de usuario debe ser ultra-simplificada (estilo "botón de pánico") y el documento legal generado debe contener cláusulas dinámicas según el país del usuario.
+
+### Modulo 2: Motor Forense de Captura y Sellado (*Evidence Vault*)
+* **Que hace:** Worker en segundo plano que navega a la URL infractora, realiza un volcado completo de headers, captura de pantalla de resolución completa, renderiza el DOM, calcula el hash SHA-256 y ejecuta `ots stamp` con OpenTimestamps.
+* **Por que es propio:** Debe garantizar la cadena de custodia digital y generar un PDF con dictamen técnico forense que se anexará al reclamo legal.
+
+### Modulo 3: Sintetizador Juridico y Clasificador de Infracciones (*Legal Matrix Engine*)
+* **Que hace:** Analizador de reglas que clasifica la infracción:
+  * *Ruta A:* Difamación / Daño moral -> Cita artículos del Código Civil local.
+  * *Ruta B:* Imagen íntima no consentida -> Vía penal (ej. Ley Olimpia en México / Art. 197 CP en España).
+  * *Ruta C:* Doxxing / Datos financieros -> Vía de derechos ARCO / GDPR Art. 17 / CCPA.
+  * *Ruta D:* Suplantación de identidad -> Violación de Términos de Servicio de Meta.
+* **Por que es propio:** Las plantillas deben redactarse en lenguaje legal riguroso y amenazante para los equipos legales de las Big Tech, citando plazos perentorios y precedentes judiciales.
+
+### Modulo 4: Orquestador de Despacho Multi-Canal (*Big Tech & Broker Dispatcher*)
+* **Que hace:** Gestiona las colas de envío:
+  * Despacha correos certificados a las direcciones legales de Google y Meta.
+  * Ejecuta scripts de Playwright para someter los formularios web de Google Legal (`support.google.com/legal`).
+  * Dispara peticiones de opt-out masivo hacia la lista curada de data brokers.
+* **Por que es propio:** Requiere el manejo de reintentos, resolución de campos dinámicos de formularios y rotación de proxies residenciales.
+
+### Modulo 5: Guardian de SLAs y Escalador Legal Automatico (*Legal SLA Watchdog*)
+* **Que hace:** Motor de base de datos que computa los plazos legales (7, 14, 20, 30 días hábiles).
+  * Día 7: Si no hay acuse o respuesta, reenvía una notificación de apercibimiento con marcado de urgencia.
+  * Día 15/30: Si la plataforma ignora el requerimiento, redacta y prepara la queja formal lista para firmar ante las autoridades reguladoras (INAI, AEPD, FTC).
+* **Por que es propio:** Este seguimiento automatizado es exactamente lo que ningún usuario hace por falta de tiempo o conocimiento.
+
+### Modulo 6: Centinela de Desindexacion y Purga de Cache (*SERP De-indexing Sentinel*)
+* **Que hace:** Consulta periódicamente (cada 12-24 horas) mediante SerpApi si el enlace sigue indexado en Google. En paralelo, verifica si el servidor de origen ya arrojó código `404 Not Found`. En cuanto detecta el `404`, somete automáticamente la petición a la herramienta de *Remove Outdated Content* de Google para acelerar la purga de caché.
+* **Por que es propio:** Cierra el ciclo completo: no solo busca la eliminación en la red social, sino que garantiza que desaparezca de los resultados de búsqueda globales.
+
+---
+
+## 7. Resumen de la Pila Tecnologica Recomendada (Tech Stack)
+
+| Capa | Tecnologia Propuesta | Justificacion |
+| :--- | :--- | :--- |
+| **Backend & Workers** | Python (FastAPI + Celery / Redis) | Ecosistema ideal para OSINT, OpenTimestamps, imagehash y automatizaciones. |
+| **Automatizacion Web** | Playwright + Playwright-Stealth | Mayor estabilidad y control asíncrono que Selenium para evadir WAFs. |
+| **Firma & KYC** | Stripe Identity + Dropbox Sign API | APIs estables con SDKs probados y cumplimiento legal internacional. |
+| **Base de Datos** | PostgreSQL + Supabase / Redis | Almacenamiento relacional para trazabilidad legal y colas rápidas para workers. |
+| **Frontend / UX** | Next.js (React) + Tailwind CSS | Interfaz moderna, reactiva, accesible y orientada a dispositivos móviles. |
+| **Monitoreo SERP** | SerpApi / ValueSERP | Extracción limpia de rankings de Google sin riesgo de bloqueo de IPs propias. |
+
+---
+
+## 8. Proximos Puntos a Desarrollar e Iterar
+1. **Definir el Caso de Uso Piloto (MVP):** ¿Con qué caso de uso arrancaremos la prueba de concepto? (Recomendado: Retiro de datos personales / doxxing o difamación en redes con desindexación en Google).
+2. **Estructura del Mandato Legal (LPOA Template):** Redacción del contrato de mandato simplificado.
+3. **Flujo de Pantallas de la UX:** Prototipo del "Botón de Pánico Digital".
