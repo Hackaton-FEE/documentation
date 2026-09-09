@@ -31,6 +31,7 @@ Analizar a profundidad las misiones, visiones, principios rectores y valores cor
 | :--- | :--- |
 | ⭐ **[`concepto-central-plataforma.md`](./concepto-central-plataforma.md)** | **[DOCUMENTO CENTRAL DE TRABAJO]** Propuesta y arquitectura conceptual de la **Aplicación Móvil**: defensa de reputación, Share Sheet nativo, desindexación en Google/Meta y modelo de agente autorizado. |
 | 🛡️ **[`osisnt-interfaz-huella-digital.md`](./osisnt-interfaz-huella-digital.md)** | **[MÓDULO OSISN'T]** Interfaz amigable y digestible de huella digital: transforma OSINT crudo en un dashboard visual, Exposure Score y remediación asistida en 1 clic (JustDelete.me, Eraser, etc.). |
+| 🎨 **[`design-system/`](./design-system/README.md)** | **[SISTEMA DE DISEÑO & TOKENS]** Guía integral de colorimetría semántica, psicología anti-pánico, escala tipográfica, métodos de experiencia de usuario (Calm Security UX) y especificación de componentes para la app Flutter. |
 | 👤 [`persona.md`](./persona.md) | Definición de Persona / Arquetipo de usuario (**Luisa Alfonsa Castilleja Peugnet**) y recorrido ante la plataforma. |
 
 ---
