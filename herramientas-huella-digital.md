@@ -157,3 +157,31 @@ JustDelete.me es un proyecto colaborativo de codigo abierto que cataloga cientos
 
 * **Soberania sobre los Propios Datos (FEE):** Estas herramientas empoderan al individuo para fiscalizar quien tiene su informacion y reclamar el control sobre sus datos, eliminando la dependencia de monopolios corporativos de datos.
 * **Higiene Operativa para Emprendedores (UL):** Un fundador o ejecutivo de negocios debe mantener un perfil de ciberseguridad higienico. Mitigar la huella digital personal reduce drasticamente vectores de ataque como *spear-phishing*, suplantacion de identidad (*CEO fraud*) e ingenieria social contra su empresa.
+
+---
+
+## 6. La Orquestación Unificada: El Motor detrás de "Osisn't"
+
+Ninguna de estas herramientas fue creada para el usuario final común; son utilidades de terminal para hackers éticos o analistas OSINT. En nuestra suite, **estas 5 herramientas constituyen el motor invisible que alimenta a [`Osisn't`](./osisnt-interfaz-huella-digital.md)**:
+
+```mermaid
+graph LR
+    subgraph Motores Backend Open-Source
+        S[Sherlock] --> AGG[OSINT Aggregator API]
+        H[Holehe] --> AGG
+        M[Maigret] --> AGG
+    end
+
+    AGG --> O[Osisn't: UI Digestible & Exposure Score]
+
+    O --> REM[Motor de Remediación]
+    subgraph Remediación Asistida
+        REM --> J[JustDelete.me: Enlaces Directos de Baja]
+        REM --> E[Eraser: Solicitudes de Borrado a Brokers]
+    end
+```
+
+1. **Sherlock, Holehe y Maigret** operan en workers asíncronos en la nube para descubrir perfiles y metadatos sin alertar al usuario ni exponer su IP.
+2. **Osisn't** unifica y normaliza los resultados, traduce el JSON crudo a tarjetas comprensibles y calcula un *Exposure Score*.
+3. **JustDelete.me y Eraser** proporcionan los botones de acción inmediata: borrar cuentas olvidadas en 1 clic y mandar cartas formales de baja a data brokers.
+

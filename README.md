@@ -17,12 +17,15 @@ Analizar a profundidad las misiones, visiones, principios rectores y valores cor
 | Archivo | Descripcion |
 | :--- | :--- |
 | ⭐ **[`concepto-central-plataforma.md`](./concepto-central-plataforma.md)** | **[DOCUMENTO CENTRAL DE TRABAJO]** Propuesta y arquitectura conceptual de la **Aplicación Móvil**: defensa de reputación, Share Sheet nativo, desindexación en Google/Meta y modelo de agente autorizado. |
+| 🛡️ **[`osisnt-interfaz-huella-digital.md`](./osisnt-interfaz-huella-digital.md)** | **[MÓDULO OSISN'T]** Interfaz amigable y digestible de huella digital: transforma OSINT crudo en un dashboard visual, Exposure Score y remediación asistida en 1 clic (JustDelete.me, Eraser, etc.). |
+| 📄 [`defensa-contra-osint-opsec.md`](./defensa-contra-osint-opsec.md) | Analisis de estrategias de Counter-OSINT, higiene digital, OPSEC y defensas técnicas contra el perfilado masivo. |
+| 📄 [`herramientas-huella-digital.md`](./herramientas-huella-digital.md) | Analisis tecnico de 5 herramientas open-source para busqueda (OSINT) y borrado/mitigacion de huella digital (Sherlock, Holehe, Maigret, Eraser, JustDelete.me). |
+| 📄 [`analisis-tecnico-endpoints-headers-osint.md`](./analisis-tecnico-endpoints-headers-osint.md) | Analisis tecnico profundo sobre el funcionamiento interno de herramientas OSINT, explotacion de endpoints web/APIs y extraccion de inteligencia en cabeceras HTTP. |
+| 📄 [`persona.md`](./persona.md) | Definición de Persona / Arquetipo de usuario (Luisa Alfonsa Castilleja Peugnet) y recorrido ante la plataforma. |
 | 📄 [`fee-valores-organizacionales.md`](./fee-valores-organizacionales.md) | Analisis exhaustivo de FEE: historia, principios de Leonard Read, valores corporativos y cultura digital. |
 | 📄 [`universidad-de-la-libertad-valores.md`](./universidad-de-la-libertad-valores.md) | Analisis detallado de la Universidad de la Libertad: modelo educativo de Ricardo Salinas Pliego, valores empresariales y hub de emprendimiento. |
 | 📄 [`comparativa-y-sinergias.md`](./comparativa-y-sinergias.md) | Matriz comparativa, convergencias filosoficas, sinergias y conceptos clave unificados para ambas instituciones. |
 | 📄 [`ciberseguridad-finanzas-y-valores.md`](./ciberseguridad-finanzas-y-valores.md) | Analisis y propuesta sobre como la Ciberseguridad y la Seguridad de la Informacion se alinean con la propiedad privada, la privacidad, la resiliencia de negocios y los valores de FEE y la UL. |
-| 📄 [`herramientas-huella-digital.md`](./herramientas-huella-digital.md) | Analisis tecnico de 5 herramientas open-source para busqueda (OSINT) y borrado/mitigacion de huella digital (Sherlock, Holehe, Maigret, Eraser, JustDelete.me). |
-| 📄 [`analisis-tecnico-endpoints-headers-osint.md`](./analisis-tecnico-endpoints-headers-osint.md) | Analisis tecnico profundo sobre el funcionamiento interno de herramientas OSINT, explotacion de endpoints web/APIs y extraccion de inteligencia en cabeceras HTTP. |
 
 ---
 

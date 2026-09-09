@@ -13,9 +13,10 @@ Hoy en dia, un individuo común o un profesionista enfrenta una vulnerabilidad a
    * Las grandes plataformas tecnologicas (**Big Tech**) no cuentan con una "API publica de borrado" para usuarios.
    * Disenan laberintos de soporte (*dark patterns*), formularios ocultos y exigencias probatorias complejas.
    * La respuesta depende de revisiones humanas lentas, donde los reclamos comunes son ignorados o archivados sin explicacion clara.
-4. **La Falencia de las Herramientas Actuales:**
-   * Las herramientas OSINT tradicionales (como Sherlock o Holehe) solo le entregan al usuario una lista cruda: *"Estas en 80 sitios"*.
+4. **La Falencia de las Herramientas Actuales y el Origen de "Osisn't":**
+   * Las herramientas OSINT tradicionales (como Sherlock o Holehe) solo le entregan al usuario una lista cruda o un volcado de consola: *"Estas en 80 sitios"*.
    * Esto genera **ansiedad sin solucion**: el usuario sabe que esta expuesto, pero no tiene el conocimiento tecnico ni legal para resolverlo.
+   * **Nuestra Respuesta ("Osisn't"):** Una interfaz intuitiva y digestible que humaniza el OSINT, traduce los datos a un lenguaje comprensible, calcula un *Exposure Score* y ofrece botones de remediación directa (1-clic a JustDelete.me, cartas a data brokers y desindexación). Ver detalle completo en [`osisnt-interfaz-huella-digital.md`](./osisnt-interfaz-huella-digital.md).
 
 ---
 
@@ -203,6 +204,10 @@ graph TD
 
     I -->|Push Notification en Tiempo Real| J[Pantalla de Bloqueo del Usuario]
 ```
+
+### Modulo 0: Osisn't (Interfaz Digestible de Huella Digital y Diagnóstico Preventivo)
+* **Que hace:** Dashboard visual interactivo que ejecuta escaneos no intrusivos (Sherlock, Holehe, Maigret, HIBP) y presenta la huella digital en un grafo comprensible con *Exposure Score* (0-100), tarjetas pedagógicas y botones de remediación inmediata (enlaces directos vía JustDelete.me y cartas a data brokers).
+* **Por que es propio:** Porque no existe en el mercado una herramienta que traduzca el OSINT técnico a un lenguaje empático para el usuario común y le ofrezca soluciones de baja en un solo clic. Consulta la especificación completa en [`osisnt-interfaz-huella-digital.md`](./osisnt-interfaz-huella-digital.md).
 
 ### Modulo 1: Cliente Movil & Interceptor Share Sheet (*Mobile Panic Button*)
 * **Que hace:** Aplicacion movil con interfaz minimalista y extension de compartir (*Share Extension*). Permite crear un caso en 3 toques: capturar post, firmar LPOA y despachar escudo legal.
