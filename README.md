@@ -16,6 +16,7 @@ Analizar a profundidad las misiones, visiones, principios rectores y valores cor
 
 | Archivo | Descripcion |
 | :--- | :--- |
+| ⭐ **[`concepto-central-plataforma.md`](./concepto-central-plataforma.md)** | **[DOCUMENTO CENTRAL DE TRABAJO]** Propuesta y arquitectura conceptual de la herramienta: automatizacion de eliminacion, desindexacion en Google/Meta y modelo de agente autorizado. |
 | 📄 [`fee-valores-organizacionales.md`](./fee-valores-organizacionales.md) | Analisis exhaustivo de FEE: historia, principios de Leonard Read, valores corporativos y cultura digital. |
 | 📄 [`universidad-de-la-libertad-valores.md`](./universidad-de-la-libertad-valores.md) | Analisis detallado de la Universidad de la Libertad: modelo educativo de Ricardo Salinas Pliego, valores empresariales y hub de emprendimiento. |
 | 📄 [`comparativa-y-sinergias.md`](./comparativa-y-sinergias.md) | Matriz comparativa, convergencias filosoficas, sinergias y conceptos clave unificados para ambas instituciones. |
