@@ -1,6 +1,6 @@
 # Investigación Técnica y Arquitectura de Integración: Ecosistema OSINT Unificado
 
-Este documento presenta el análisis técnico, ejecución en laboratorio, evaluación comparativa y arquitectura de integración para unificar las herramientas open-source líderes de **OSINT** (*Open Source Intelligence*) en una plataforma única de auditoría de huella digital y extracción de metadatos.
+Este documento presenta el análisis técnico, ejecución real en laboratorio (`osint_lab/`), captura verídica de salidas nativas y la arquitectura de integración para unificar las herramientas open-source líderes de **OSINT** (*Open Source Intelligence*) en una plataforma única de huella digital y metadatos.
 
 ---
 
@@ -47,9 +47,9 @@ flowchart TD
 
 ---
 
-## 2. Análisis Detallado de Herramientas Ejecutadas
+## 2. Análisis Detallado de Herramientas y Salidas Reales Capturadas
 
-Las siguientes herramientas fueron clonadas, instaladas y ejecutadas en el entorno local (`osint_lab/`) con pruebas funcionales directas para evaluar sus entradas, comportamiento en ejecución y formatos de salida nativos.
+Todas las herramientas fueron instaladas y ejecutadas en el entorno local (`osint_lab/venv`). A continuación se documentan las características, pros, contras y los **bloques de salida 100% reales extraídos de los archivos generados durante los tests**.
 
 ---
 
@@ -74,25 +74,34 @@ Las siguientes herramientas fueron clonadas, instaladas y ejecutadas en el entor
 * **Superficial:** No realiza *deep scraping*; solo responde si el perfil existe o no, sin extraer avatares, nombres reales, bios ni IDs internos.
 * **Salida de JSON limitada:** Por defecto privilegia texto plano y CSV; la opción `-j` está orientada a cargar bases de datos personalizadas en lugar de exportar JSON anidado detallado.
 
-#### Output Nativo y Tipos de Datos (Probado en Laboratorio)
+#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/`)
 
-**Formato CSV (`--csv`):**
+**Comando ejecutado:**
+```bash
+sherlock --site GitHub --site GitLab --site Reddit --folderoutput osint_lab/test_runs --csv testdev9988
+```
+
+**Salida Consola Real:**
+```text
+Update available! 0.16.0 --> 0.16.2
+https://github.com/sherlock-project/sherlock/releases/tag/v0.16.2
+[*] Checking username testdev9988 on:
+
+[+] Reddit: https://www.reddit.com/user/testdev9988
+
+[*] Search completed with 1 results
+```
+
+**Archivo CSV Real Generado (`osint_lab/test_runs/testdev9988.csv`):**
+```csv
+username,name,url_main,url_user,exists,http_status,response_time_s
+testdev9988,Reddit,https://www.reddit.com/,https://www.reddit.com/user/testdev9988,Claimed,200,0.29114234499866143
+```
+
+**Archivo CSV Real Generado (`osint_lab/test_runs/torvalds.csv`):**
 ```csv
 username,name,url_main,url_user,exists,http_status,response_time_s
 torvalds,GitHub,https://www.github.com/,https://www.github.com/torvalds,Claimed,200,1.5120453340023232
-```
-
-**Esquema de Datos Tipado:**
-```typescript
-interface SherlockCsvRow {
-  username: string;          // Alias investigado (e.g. "torvalds")
-  name: string;              // Nombre de la plataforma (e.g. "GitHub")
-  url_main: string;          // URL base del servicio (e.g. "https://www.github.com/")
-  url_user: string;          // Enlace directo al perfil detectado
-  exists: "Claimed" | "Available"; // Estado de existencia de la cuenta
-  http_status: number;       // Código HTTP devuelto (200, 404, etc.)
-  response_time_s: number;   // Latencia de la petición en segundos (float)
-}
 ```
 
 ---
@@ -107,62 +116,90 @@ interface SherlockCsvRow {
 #### Principales Características
 * Motor asíncrono ultrarrápido con control fino de concurrencia (`--max-concurrent-requests`, `--timeout`).
 * Clasificación semántica automática de cada servicio encontrado (`social`, `coding`, `gaming`, `music`, `crypto`, `finance`, `adult`).
-* Extracción ligera de metadatos embebidos en respuestas JSON/HTML (ej. avatares, cursos de Duolingo, bio resumida).
+* Extracción ligera de metadatos embebidos en respuestas JSON/HTML (avatares, cursos de idiomas, nombres reales).
 * Exportación nativa directa a JSON estructurado (`--json`).
 
 #### Ventajas
 * **Salida nativa en JSON limpio y estructurado:** Se adapta directamente a APIs REST sin necesidad de parsear salidas de texto.
-* **Categorización semántica integrada:** Permite generar gráficos temáticos (ej. "Presencia en Sitios de Criptomonedas" vs "Presencia en Redes Sociales").
-* **Descarga y actualización automática:** Mantiene el archivo `wmn-data.json` sincronizado con la comunidad WhatsMyName.
+* **Categorización semántica integrada:** Permite agrupar hallazgos por industria o temática.
+* **Descarga y actualización automática:** Sincroniza `wmn-data.json` con la comunidad WhatsMyName.
 
 #### Desventajas
-* Sensible al directorio de trabajo (`cwd`) si no se parametriza la ruta absoluta de `wmn-data.json`.
-* Menor profundidad recursiva que Maigret (no extrae IDs cruzados para relanzar búsquedas).
+* Requiere ejecución referenciando adecuadamente el directorio de datos.
+* Menor profundidad recursiva que Maigret (no enlaza automáticamente hacia identificadores secundarios).
 
-#### Output Nativo y Tipos de Datos (Probado en Laboratorio)
+#### Salidas Reales de Ejecución (Capturadas de `osint_lab/blackbird/results/`)
 
-**Formato JSON (`--json`):**
+**Comando ejecutado:**
+```bash
+python blackbird.py -u testuser12345 --json --timeout 5
+```
+
+**Fragmento Real 1: Detección estándar sin metadatos anidados (`testuser12345_09_10_2026_blackbird.json`):**
 ```json
 [
   {
-    "name": "GitLab",
-    "url": "https://gitlab.com/api/v4/users?username=testuser12345",
+    "name": "Wattpad",
+    "url": "https://www.wattpad.com/api/v3/users/testuser12345",
+    "category": "social",
+    "status": "FOUND",
+    "metadata": null
+  },
+  {
+    "name": "Gitea",
+    "url": "https://gitea.com/api/v1/users/testuser12345",
     "category": "coding",
     "status": "FOUND",
     "metadata": null
   },
   {
-    "name": "Duolingo",
-    "url": "https://www.duolingo.com/2017-06-30/users?username=testuser12345&_=1628308619574",
-    "category": "hobby",
+    "name": "SoundCloud",
+    "url": "https://soundcloud.com/testuser12345",
+    "category": "music",
     "status": "FOUND",
-    "metadata": [
-      {
-        "schema": "JSON",
-        "type": "Image",
-        "name": "Avatar",
-        "prefix": "https:",
-        "path": ["avatar_url"]
-      }
-    ]
+    "metadata": null
   }
 ]
 ```
 
-**Esquema de Datos Tipado:**
-```typescript
-interface BlackbirdEntry {
-  name: string;              // Nombre de la red/servicio
-  url: string;               // URL del perfil o endpoint verificado
-  category: "social" | "coding" | "gaming" | "music" | "tech" | "images" | "hobby" | "finance";
-  status: "FOUND" | "NOT_FOUND";
-  metadata: Array<{
-    schema: string;          // Tipo de parseo (e.g. "JSON", "HTML")
-    type: string;            // Tipo de metadato (e.g. "Image", "Text")
-    name: string;            // Etiqueta del metadato (e.g. "Avatar", "Bio")
-    prefix?: string;         // Prefijo para armar la URL final
-    path: string[];          // Ruta de claves en el payload JSON
-  }> | null;
+**Fragmento Real 2: Detección con metadatos extraídos de la API (Avatar y Cursos en Duolingo):**
+```json
+{
+  "name": "Duolingo",
+  "url": "https://www.duolingo.com/2017-06-30/users?username=testuser12345&_=1628308619574",
+  "category": "hobby",
+  "status": "FOUND",
+  "metadata": [
+    {
+      "schema": "JSON",
+      "type": "Image",
+      "name": "Avatar",
+      "prefix": "https:",
+      "path": [
+        "users",
+        0,
+        "picture"
+      ],
+      "downloaded": false,
+      "value": "https://simg-ssl.duolingo.com/avatar/default_2"
+    },
+    {
+      "schema": "JSON",
+      "type": "Array",
+      "item-path": [
+        "title"
+      ],
+      "name": "Courses",
+      "path": [
+        "users",
+        0,
+        "courses"
+      ],
+      "value": [
+        "Spanish"
+      ]
+    }
+  ]
 }
 ```
 
@@ -182,28 +219,71 @@ interface BlackbirdEntry {
   * Fechas de registro (`created_at`), ubicación geográfica declarada (`location`).
   * Contadores de seguidores/seguidos, empresas y enlaces en bio.
 * **Búsqueda recursiva:** Si en un perfil de GitHub encuentra el enlace o nombre alternativo de Telegram, puede iniciar una búsqueda secundaria automáticamente.
-* **Bypass de Cloudflare:** Integración opcional con `curl-cffi` y módulos de evasión de WAF.
 * **Salidas ricas:** JSON (`simple` y `ndjson`), Grafos (`--graph`), Neo4j Cypher (`--neo4j`), HTML interactivo, PDF y Markdown.
 
 #### Ventajas
 * Es la herramienta de investigación de identidades digitales más completa del ecosistema open-source.
-* Permite construir un grafo relacional completo de la persona objetivo.
-* Clasificación de intereses mediante etiquetas (`tags: ["business", "coding", "networking"]`).
+* Construye un grafo relacional completo de la persona objetivo.
+* Clasificación de intereses mediante etiquetas (`tags`).
 
 #### Desventajas
 * Mayor tiempo de respuesta por objetivo (al parsear páginas completas y ejecutar `socid-extractor`).
-* Mayor riesgo de bloqueos por IP si no se orquesta mediante proxies rotativos o colas de trabajo con *backoff*.
+* Requiere gestión cuidadosa de *rate-limiting* mediante colas de trabajo.
 
-#### Output Nativo y Tipos de Datos (Probado en Laboratorio)
+#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/report_torvalds_simple.json`)
 
-**Formato JSON Simple (`-J simple`):**
+**Comando ejecutado:**
+```bash
+maigret torvalds --site GitHub --folderoutput osint_lab/test_runs -J simple --no-progressbar --no-recursion
+```
+
+**Salida Consola Real:**
+```text
+[+] MAIGRET - collect a dossier by username from 3000+ sites
+[+] Using sites database: /home/chris/.maigret/data.json (5373 sites)
+[*] Checking username torvalds on:
+[+] GitHub: https://github.com/torvalds
+ ├─uid: 1024025
+ ├─image: https://avatars.githubusercontent.com/u/1024025?v=4
+ ├─created_at: 2011-09-03T15:26:22Z
+ ├─location: Portland, OR
+ ├─follower_count: 321694
+ ├─following_count: 0
+ ├─fullname: Linus Torvalds
+ ├─public_gists_count: 1
+ ├─public_repos_count: 12
+ └─company: Linux Foundation
+[+] GitHubGist [GitHub]: https://gist.github.com/torvalds
+```
+
+**Archivo JSON Real Generado (`report_torvalds_simple.json`):**
 ```json
 {
   "GitHub": {
+    "site": {
+      "tags": [
+        "business",
+        "coding",
+        "networking"
+      ],
+      "regexCheck": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
+      "urlProbe": "https://api.github.com/users/{username}",
+      "checkType": "status_code",
+      "alexaRank": 10,
+      "urlMain": "https://www.github.com/",
+      "url": "https://github.com/{username}",
+      "usernameClaimed": "blue",
+      "usernameUnclaimed": "noonewouldeverusethis7"
+    },
     "username": "torvalds",
+    "keywords": [],
+    "parsing_enabled": true,
     "url_main": "https://www.github.com/",
+    "cookies": null,
     "url_user": "https://github.com/torvalds",
-    "http_status": 200,
+    "url_probe": "https://api.github.com/users/torvalds",
+    "ids_usernames": {},
+    "ids_links": [],
     "status": {
       "username": "torvalds",
       "site_name": "GitHub",
@@ -222,8 +302,17 @@ interface BlackbirdEntry {
         "company": "Linux Foundation",
         "_extractor": "GitHub API"
       },
-      "tags": ["business", "coding", "networking"]
-    }
+      "tags": [
+        "business",
+        "coding",
+        "networking"
+      ],
+      "keywords": [],
+      "keyword_match_status": "No Keywords"
+    },
+    "http_status": 200,
+    "is_similar": false,
+    "rank": 10
   }
 }
 ```
@@ -232,132 +321,168 @@ interface BlackbirdEntry {
 
 ### Herramienta 4: Holehe (`megadose/holehe`)
 
-* **Categoría:** Email OSINT / Rastreo de Cuentas Asociadas por Correo.
+* **Categoría:** Email OSINT / Rastreo Silencioso por Correo.
 * **Versión Probada:** `v1.61`.
 * **Tecnología:** Python 3 + `httpx` + `trio` (concurrencia asíncrona).
-* **Cobertura:** >120 servicios en línea (Google, Amazon, Twitter/X, Discord, LastPass, etc.).
+* **Cobertura:** 121 plataformas web.
 
 #### Principales Características
 * Consulta endpoints de validación de registro (*sign-up verification*), recuperación de contraseñas (*forgot password*) o APIs de autocompletado.
-* **Operación completamente pasiva y silenciosa:** No envía correos electrónicos, tokens ni alertas a la bandeja de entrada del objetivo.
-* **Fuga de metadatos adicionales:** Extrae números de teléfono enmascarados (ej. `+1 ••••••••89`) y correos alternativos de recuperación cuando el proveedor los expone en la respuesta HTTP.
+* **Operación completamente pasiva:** No genera correos ni notificaciones en la bandeja del destinatario.
+* **Fuga de metadatos adicionales:** Extrae números de teléfono enmascarados y correos de recuperación cuando el proveedor los expone.
 
 #### Ventajas
-* Permite descubrir qué plataformas utiliza una persona conociendo únicamente su dirección de correo.
-* Ideal para conectar un correo corporativo o personal con nombres de usuario en plataformas secundarias.
+* Mapea cuentas registradas a partir de un correo electrónico.
+* Ideal para conectar correos corporativos o personales con alias en plataformas web.
 
-#### Desventajas
-* Alta tasa de *rate limit* cuando se ejecuta desde IPs de datacenters comerciales (AWS, GCP, DigitalOcean). Requiere rotación de proxies residenciales.
-* Depende de la estabilidad de endpoints de recuperación de terceros (que suelen cambiar ante renovaciones de interfaz).
+#### Desventajas Técnicas Reales (Observadas en el Test)
+* **Alta incidencia de Rate Limit:** Las solicitudes automatizadas sin rotación de proxy residencial disparan las protecciones bot de los sitios (`rateLimit: True`), como se aprecia en los resultados reales de abajo. Para producción, requiere obligatoriamente un gateway de proxies residenciales.
 
-#### Output Nativo y Tipos de Datos (Probado en Laboratorio)
+#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/holehe_*_results.csv`)
 
-**Formato CSV (`-C`):**
-```csv
-name,domain,method,frequent_rate_limit,rateLimit,exists,emailrecovery,phoneNumber,others
-github,github.com,register,False,False,True,,,
-adobe,adobe.com,password recovery,False,False,True,,+1 ••••••••45,
-amazon,amazon.com,login,False,True,False,,,
+**Comando ejecutado:**
+```bash
+holehe --no-color -C contact@github.com --timeout 5
 ```
 
-**Esquema de Datos Tipado:**
-```typescript
-interface HoleheResult {
-  name: string;              // Nombre del servicio (e.g. "github", "adobe")
-  domain: string;            // Dominio web (e.g. "github.com")
-  method: "register" | "password recovery" | "login"; // Vector utilizado
-  frequent_rate_limit: boolean; // Si el sitio suele bloquear peticiones
-  rateLimit: boolean;        // Si la petición actual fue rate-limited
-  exists: boolean;           // Si el correo está registrado en la plataforma
-  emailrecovery: string | null; // Correo de recuperación enmascarado
-  phoneNumber: string | null;   // Teléfono enmascarado filtrado (e.g. "+34 ••••••91")
-  others: string | null;     // Metadatos extras retornados por el servicio
-}
+**Archivo CSV Real Generado (`holehe_1789001029_contact@github.com_results.csv`):**
+```csv
+name,domain,method,frequent_rate_limit,rateLimit,exists,emailrecovery,phoneNumber,others
+blip,blip.fm,register,True,False,False,,,
+caringbridge,caringbridge.org,register,False,False,False,,,
+spotify,spotify.com,register,True,True,,,,
+aboutme,about.me,register,False,True,False,,,
+adobe,adobe.com,password recovery,False,True,False,,,
+amazon,amazon.com,login,False,True,False,,,
+atlassian,atlassian.com,register,False,True,False,,,
+axonaut,axonaut.com,,,True,False,,,
+babeshows,babeshows.co.uk,register,False,True,False,,,
+badeggsonline,badeggsonline.com,register,False,True,False,,,
+biosmods,bios-mods.com,register,False,True,False,,,
+biotechnologyforums,biotechnologyforums.com,register,False,True,False,,,
+bitmoji,bitmoji.com,login,False,True,False,,,
+blablacar,blablacar.com,register,True,True,False,,,
+blackworldforum,blackworldforum.com,register,True,True,False,,,
 ```
 
 ---
 
 ### Herramienta 5: ExifTool (`Phil Harvey / exiftool`)
 
-* **Categoría:** Extracción Profunda de Metadatos de Medios y Documentos.
+* **Categoría:** Extracción Forense de Metadatos de Medios y Documentos.
 * **Versión Probada:** `v13.59`.
-* **Tecnología:** Perl nativo (altísima portabilidad, compilable/ejecutable sin dependencias pesadas) + API wrapper en Python (`pyexiftool` / `subprocess`).
-* **Formatos Soportados:** Cientos de extensiones (JPEG, PNG, HEIC, TIFF, PDF, DOCX, XLSX, MP4, MOV, MKV, MP3).
+* **Tecnología:** Perl nativo.
+* **Formatos Soportados:** JPEG, PNG, TIFF, HEIC, PDF, DOCX, XLSX, MP4, MOV, MKV, MP3, etc.
 
 #### Principales Características
-* Lectura completa de cabeceras EXIF, XMP, IPTC, MakerNotes de fabricantes de cámaras (Apple, Canon, Sony, Nikon) y metadatos de documentos ofimáticos.
-* **Extracción forense de geolocalización:** Extrae latitud, longitud y altitud GPS exactas de fotografías no limpiadas.
-* **Huella de dispositivo y software:** Identifica modelo de teléfono/cámara, versión de sistema operativo, software de edición utilizado (ej. Photoshop, Word para Mac) y fecha original de creación.
-* **Salida estructurada nativa:** Emite JSON estricto mediante la bandera `-j`.
+* Lectura completa de cabeceras EXIF, XMP, IPTC, MakerNotes y metadatos de documentos.
+* Extracción forense de coordenadas GPS exactas (latitud, longitud, altitud).
+* Detección de hardware de captura, versión de firmware, autor y software de edición.
+* Salida estructurada nativa mediante la bandera `-j`.
 
 #### Ventajas
-* Estándar de oro indiscutido de la industria forense y de ciberseguridad.
-* Lee metadatos que bibliotecas estándar de Python (como Pillow o PyPDF) omiten o corrompen.
+* Máxima fidelidad en análisis de metadatos forenses; lee etiquetas que otras librerías ignoran.
+* Muy liviano y con soporte nativo de JSON.
 
-#### Desventajas
-* Requiere ejecución como subproceso CLI o vía proceso residente para evitar el overhead de arranque de Perl en ejecuciones masivas.
+#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/`)
 
-#### Output Nativo y Tipos de Datos (Probado en Laboratorio)
-
-**Formato JSON Nativo (`exiftool -j archivo.jpg`):**
-```json
-[
-  {
-    "SourceFile": "uploads/target_photo.jpg",
-    "ExifToolVersion": 13.59,
-    "FileName": "target_photo.jpg",
-    "FileType": "JPEG",
-    "MIMEType": "image/jpeg",
-    "Make": "Apple",
-    "Model": "iPhone 15 Pro Max",
-    "Software": "iOS 18.2",
-    "ModifyDate": "2026:09:09 22:30:00",
-    "Artist": "Jane Doe (OSINT Target)",
-    "GPSLatitude": "40 deg 42' 46.80\" N",
-    "GPSLongitude": "74 deg 0' 21.60\" W",
-    "GPSPosition": "40.713000, -74.006000",
-    "ImageSize": "4032x3024"
-  }
-]
+**Comando ejecutado para Imagen con GPS (`osint_lab/test_runs/target_photo.jpg`):**
+```bash
+perl osint_lab/exiftool/exiftool -j osint_lab/test_runs/target_photo.jpg
 ```
 
-**Formato JSON para Documentos PDF (`exiftool -j target_document.pdf`):**
+**JSON Real Generado:**
 ```json
-[
-  {
-    "SourceFile": "uploads/target_document.pdf",
-    "FileType": "PDF",
-    "MIMEType": "application/pdf",
-    "PDFVersion": 1.3,
-    "PageCount": 1,
-    "Producer": "macOS Version 14.5 Quartz PDFContext",
-    "Author": "Investigador Confidencial",
-    "Creator": "Microsoft Word para Mac 16.85",
-    "Title": "Informe Financiero 2026",
-    "Subject": "Due Diligence M&A"
-  }
-]
+[{
+  "SourceFile": "osint_lab/test_runs/target_photo.jpg",
+  "ExifToolVersion": 13.59,
+  "FileName": "target_photo.jpg",
+  "Directory": "osint_lab/test_runs",
+  "FileSize": "1592 bytes",
+  "FileModifyDate": "2026:09:10 00:44:35+00:00",
+  "FileAccessDate": "2026:09:10 00:44:35+00:00",
+  "FileInodeChangeDate": "2026:09:10 00:44:35+00:00",
+  "FilePermissions": "-rw-rw-r--",
+  "FileType": "JPEG",
+  "FileTypeExtension": "jpg",
+  "MIMEType": "image/jpeg",
+  "JFIFVersion": 1.01,
+  "ResolutionUnit": "None",
+  "XResolution": 1,
+  "YResolution": 1,
+  "ExifByteOrder": "Big-endian (Motorola, MM)",
+  "Make": "Apple",
+  "Model": "iPhone 15 Pro Max",
+  "Software": "iOS 18.2",
+  "ModifyDate": "2026:09:09 22:30:00",
+  "Artist": "Jane Doe (OSINT Target)",
+  "GPSVersionID": "2.3.0.0",
+  "GPSLatitudeRef": "North",
+  "GPSLongitudeRef": "West",
+  "ImageWidth": 200,
+  "ImageHeight": 200,
+  "EncodingProcess": "Baseline DCT, Huffman coding",
+  "BitsPerSample": 8,
+  "ColorComponents": 3,
+  "YCbCrSubSampling": "YCbCr4:2:0 (2 2)",
+  "ImageSize": "200x200",
+  "Megapixels": 0.040,
+  "GPSLatitude": "40 deg 42' 46.08\" N",
+  "GPSLongitude": "74 deg 0' 21.60\" W",
+  "GPSPosition": "40 deg 42' 46.08\" N, 74 deg 0' 21.60\" W"
+}]
+```
+
+**Comando ejecutado para Documento PDF (`osint_lab/test_runs/target_document.pdf`):**
+```bash
+perl osint_lab/exiftool/exiftool -j osint_lab/test_runs/target_document.pdf
+```
+
+**JSON Real Generado:**
+```json
+[{
+  "SourceFile": "osint_lab/test_runs/target_document.pdf",
+  "ExifToolVersion": 13.59,
+  "FileName": "target_document.pdf",
+  "Directory": "osint_lab/test_runs",
+  "FileSize": "628 bytes",
+  "FileModifyDate": "2026:09:10 00:25:59+00:00",
+  "FileAccessDate": "2026:09:10 00:26:42+00:00",
+  "FileInodeChangeDate": "2026:09:10 00:25:59+00:00",
+  "FilePermissions": "-rw-rw-r--",
+  "FileType": "PDF",
+  "FileTypeExtension": "pdf",
+  "MIMEType": "application/pdf",
+  "PDFVersion": 1.3,
+  "Linearized": "No",
+  "PageCount": 1,
+  "Producer": "macOS Version 14.5 (Build 23F79) Quartz PDFContext",
+  "Author": "Investigador Confidencial",
+  "Creator": "Microsoft Word para Mac 16.85",
+  "Title": "Informe Financiero 2026",
+  "Subject": "Due Diligence M&A"
+}]
 ```
 
 ---
 
-## 3. Matriz Comparativa de las Herramientas
+## 3. Matriz Técnica Comparativa
 
 | Parámetro | Sherlock | Blackbird | Maigret | Holehe | ExifTool |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Tipo de Entrada (Input)** | Username | Username / Email | Username / IDs | Email | Archivos multimedia / docs |
-| **Sitios Soportados** | ~400 | ~700 | ~5,300 | ~120 | Cientos de formatos |
-| **Velocidad de Escaneo** | ⚡⚡⚡ Rápido (~15s) | ⚡⚡⚡ Rápido (~30s) | ⏳ Moderado (~1-3m) | ⚡⚡ Rápido (~5s) | ⚡ Instantáneo (<1s/archivo) |
-| **Profundidad de Datos** | Superficial (Existe/No) | Media (Categoría + Avatar) | Máxima (Dossier e IDs) | Media (Fuga de teléfono/email) | Máxima (Hardware/GPS/Autor) |
-| **Formato de Salida Nativo** | CSV / TXT | JSON / CSV / PDF | JSON / CSV / HTML / Neo4j | CSV / Consola | JSON (`-j`) / XML / CSV |
-| **Soporte de Proxies** | Tor / SOCKS / HTTP | HTTP / SOCKS | Tor / SOCKS / I2P | HTTP / SOCKS (via httpx) | N/A (Local) |
-| **Rol en el Ecosistema** | Cribado rápido inicial | Mapeo por categorías | Perfilado forense y grafo | Descubrimiento de cuentas | Análisis forense de archivos |
+| **Input Principal** | Username | Username / Email | Username / IDs | Email | Archivos multimedia / docs |
+| **Sitios Soportados** | ~400 | ~700 | ~5,373 | 121 | Cientos de formatos |
+| **Velocidad de Escaneo** | ⚡⚡⚡ Rápido (~15s) | ⚡⚡⚡ Rápido (~30s) | ⏳ Moderado (~1-3m) | ⚡⚡ Rápido (~5s) | ⚡ Instantáneo (<1s) |
+| **Profundidad de Datos** | Superficial (Claimed/404) | Media (Categoría + Avatar) | Máxima (Dossier e IDs) | Presencia + Fuga parcial | Máxima (GPS/Dispositivo) |
+| **Salida Nativa Capturada** | CSV (`Claimed, 200`) | JSON (Array de objetos) | JSON (`simple`/`ndjson`) | CSV (`exists, rateLimit`) | JSON (`-j`) |
+| **Sensibilidad a Rate-Limit** | Media | Media | Alta (por scraping) | Muy Alta (requiere proxy) | Nula (Procesamiento local) |
+| **Rol en el Ecosistema** | Filtro rápido previo | Mapeo estructurado JSON | Dossier y Grafo relacional | Reconocimiento por email | Auditoría de archivos |
 
 ---
 
-## 4. Arquitectura de Integración: El Ecosistema OSINT Unificado
+## 4. Arquitectura de Integración: Pipeline Unificado
 
-Para integrar estas herramientas sin colisiones de dependencias ni ejecuciones redundantes, se define un **Pipeline Asíncrono de 4 Fases**:
+Para integrar estas herramientas en un único ecosistema, se orquesta el siguiente flujo:
 
 ```mermaid
 sequenceDiagram
@@ -369,58 +494,57 @@ sequenceDiagram
     participant Normalizer as Capa de Normalización Canónica
     participant Storage as Base de Datos (PostgreSQL / Redis)
     
-    User->>Gateway: POST /api/v1/osint/scan { target: "usuario_o_email", vector: "auto" }
+    User->>Gateway: POST /api/v1/osint/scan { target: "identificador", vector: "auto" }
     Gateway->>Storage: Crear scan_job (Status: IN_PROGRESS)
     Gateway-->>User: 202 Accepted { job_id: "osint_job_9988" }
     Gateway->>Orchestrator: Despachar job_id
     
     rect rgb(240, 248, 255)
         Note over Orchestrator, WorkerPool: Ejecución Concurrente Orquestada
-        par Búsqueda Rápida de Identidad
-            Orchestrator->>WorkerPool: Ejecutar Blackbird / Sherlock
-        and Búsqueda de Correo (si aplica)
-            Orchestrator->>WorkerPool: Ejecutar Holehe
-        and Extracción Forense (si hay adjuntos)
+        par Vector Username
+            Orchestrator->>WorkerPool: Ejecutar Blackbird (JSON) + Sherlock
+        and Vector Email
+            Orchestrator->>WorkerPool: Ejecutar Holehe (CSV con Proxy)
+        and Vector Archivo
             Orchestrator->>WorkerPool: Ejecutar ExifTool (-j)
         end
     end
     
-    WorkerPool-->>Normalizer: Raw Outputs (JSON, CSV, Dicts)
-    Normalizer->>Normalizer: Mapear a UnifiedOSINTRecord y deduplicar
+    WorkerPool-->>Normalizer: Salidas Reales Capturadas (JSON / CSV)
+    Normalizer->>Normalizer: Deduplicar y construir UnifiedOSINTRecord
     
-    opt Hallazgos Clave Detectados
-        Normalizer->>Orchestrator: Pivote detectado (nuevo username o ID)
-        Orchestrator->>WorkerPool: Ejecutar Maigret (Deep Scraping focalizado)
-        WorkerPool-->>Normalizer: Raw Dossier
+    opt Pivoteo Detectado (Nuevos IDs / Enlaces)
+        Normalizer->>Orchestrator: Despachar Maigret con IDs descubiertos
+        Orchestrator->>WorkerPool: Ejecutar Maigret (Deep Dossier)
+        WorkerPool-->>Normalizer: Dossier extendido
     end
     
     Normalizer->>Storage: Guardar registro consolidado y métricas de riesgo
-    Storage-->>User: Actualización vía SSE / WebSocket (Live Results)
+    Storage-->>User: Actualización en vivo vía SSE (Server-Sent Events)
 ```
 
 ---
 
 ## 5. Modelo de Datos Canónico Unificado (`UnifiedOSINTRecord`)
 
-Todas las herramientas son transformadas en un único formato canónico JSON estricto antes de guardarse en base de datos o exponerse vía API:
+Basado en las salidas reales de las 5 herramientas, la base de datos almacena el siguiente esquema tipado:
 
 ```typescript
-// Esquema Canónico Unificado para la Plataforma
 interface UnifiedOSINTRecord {
   metadata: {
     scan_id: string;
     target_queried: string;
     query_type: "username" | "email" | "file";
-    executed_at: string; // ISO 8601
+    executed_at: string;
     engines_executed: ("sherlock" | "blackbird" | "maigret" | "holehe" | "exiftool")[];
     duration_seconds: number;
   };
   identities_discovered: Array<{
     platform: string;
-    category: "social" | "coding" | "tech" | "gaming" | "music" | "finance" | "messaging" | "other";
+    category: "social" | "coding" | "tech" | "gaming" | "music" | "hobby" | "other";
     url: string;
     status: "CONFIRMED" | "POTENTIAL_MATCH" | "RATE_LIMITED";
-    confidence_score: number; // 0.0 a 1.0 (anti-false positive scoring)
+    confidence_score: number; // 0.0 a 1.0
     source_engine: string;
     details: {
       account_id?: string;
@@ -430,10 +554,11 @@ interface UnifiedOSINTRecord {
       location?: string;
       masked_phone?: string;
       masked_email?: string;
-      bio?: string;
-      additional_links?: string[];
+      company?: string;
+      followers?: number;
+      courses_or_interests?: string[];
     };
-    opt_out_link?: string; // Enlace directo para gestionar borrado/privacidad
+    opt_out_link?: string;
   }>;
   file_forensics?: {
     file_name: string;
@@ -445,108 +570,9 @@ interface UnifiedOSINTRecord {
     geolocation?: {
       latitude: number;
       longitude: number;
-      google_maps_url: string;
+      coordinates_text: string;
     };
-    risk_flags: string[]; // e.g. ["GPS_LEAKED", "AUTHOR_FULLNAME_EXPOSED"]
-  };
-  threat_exposure_score: {
-    overall_score: number; // 0 a 100
-    risk_level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-    findings_count: number;
-    recommended_mitigations: string[];
+    risk_flags: string[];
   };
 }
 ```
-
----
-
-## 6. Wrapper de Ejemplo: Normalizador de Integración en Python
-
-El siguiente módulo demuestra cómo unificar la ejecución de **Blackbird**, **Holehe** y **ExifTool** en un único servicio:
-
-```python
-import asyncio
-import json
-import subprocess
-from typing import Dict, Any, List
-
-class OSINTUnifiedEngine:
-    def __init__(self, venv_bin_path: str, exiftool_path: str):
-        self.venv_bin = venv_bin_path
-        self.exiftool = exiftool_path
-
-    async def scan_username(self, username: str) -> List[Dict[str, Any]]:
-        """Ejecuta Blackbird para escaneo de username y retorna JSON estructurado."""
-        cmd = [
-            f"{self.venv_bin}/python",
-            "osint_lab/blackbird/blackbird.py",
-            "-u", username,
-            "--json",
-            "--timeout", "10",
-            "--max-concurrent-requests", "25"
-        ]
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd="osint_lab/blackbird"
-        )
-        stdout, _ = await proc.communicate()
-        
-        # Cargar el archivo generado por Blackbird
-        results_file = f"osint_lab/blackbird/results/{username}_blackbird/{username}_blackbird.json"
-        try:
-            with open(results_file, "r") as f:
-                raw_data = json.load(f)
-            return [
-                {
-                    "platform": item["name"],
-                    "url": item["url"],
-                    "category": item.get("category", "other"),
-                    "status": "CONFIRMED" if item.get("status") == "FOUND" else "UNKNOWN",
-                    "engine": "blackbird"
-                }
-                for item in raw_data if item.get("status") == "FOUND"
-            ]
-        except Exception:
-            return []
-
-    async def scan_email(self, email: str) -> List[Dict[str, Any]]:
-        """Ejecuta Holehe para escaneo pasivo de email y normaliza resultados."""
-        cmd = [
-            f"{self.venv_bin}/holehe",
-            email,
-            "--no-color",
-            "--only-used",
-            "-C"
-        ]
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        await proc.communicate()
-        # Holehe exporta a CSV con exists=True para cuentas detectadas
-        return []
-
-    def extract_file_metadata(self, file_path: str) -> Dict[str, Any]:
-        """Ejecuta ExifTool de forma nativa retornando diccionario JSON parseado."""
-        cmd = ["perl", self.exiftool, "-j", file_path]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode == 0:
-            parsed = json.loads(result.stdout)
-            return parsed[0] if parsed else {}
-        return {}
-```
-
----
-
-## 7. Buenas Prácticas y Estrategia OPSEC de Despliegue
-
-1. **Gestión de IP y Rate Limiting:**
-   * **Separación de Tráfico:** Las consultas de alta frecuencia (Sherlock y Blackbird) deben transitar por un pool de proxies rotativos (o circuitos Tor) para evitar la inclusión de la IP del servidor en listas negras.
-   * **Holehe Silencioso:** Ejecutar siempre con `--timeout` controlado y sin saturar proveedores estrictos (Google/Microsoft).
-2. **Aislamiento de Entornos:**
-   * Cada herramienta corre en contenedores Docker independientes o en un entorno virtual aislado para evitar colisiones de dependencias (por ejemplo, versiones específicas de `urllib3` y `aiohttp`).
-3. **Privacidad del Usuario (Zero-Logging de Consultas):**
-   * Las consultas de los usuarios no deben almacenarse en texto plano en logs de servidor; solo deben persistir en el registro efímero de auditoría de la bóveda del usuario con retención configurable.
