@@ -51,11 +51,11 @@ Para garantizar una ergonomía óptima con una sola mano, la aplicación ancla d
 
 ### 2.1. Anatomía
 1. **Botón Izquierdo ("Escanear Identidad"):**
-   - Estilo: `OutlinedButton` elevado o `FilledButton.tonal` con color secundario (`#E0F2EF`).
+   - Estilo: `OutlinedButton` elevado o `FilledButton.tonal` con color suave de acento (`#FFF1B4` / `#C0B587`).
    - Icono: `Icons.radar_rounded` o `Icons.manage_search`.
    - Altura mínima: `52dp`, esquinas redondeadas `BorderRadius.circular(18)`.
 2. **Botón Derecho ("Nuevo Reporte"):**
-   - Estilo: `FilledButton` con color primario institucional (`#167569`).
+   - Estilo: `FilledButton` con color primario institucional (`#403D2D`).
    - Icono: `Icons.add_moderator_rounded`.
    - Altura mínima: `52dp`, elevación `4dp`.
 * **Separación (*Gap*):** `12dp` entre ambos botones con distribución simétrica proporcional (`Row` con `Expanded`).
@@ -106,7 +106,7 @@ Modal interactivo deslizable que permite ingresar nuevos identificadores para se
   - `Handle / Alias` (e.g. `@usuario`)
   - `Teléfono` (e.g. `+52 55 ...`)
 * **Campo de Entrada (`TextField`):**
-  - Relleno suave `#F8FAFC`, borde de enfoque `#167569` de `2px`.
+  - Relleno suave `#F8FAFC`, borde de enfoque `#403D2D` de `2px`.
   - Icono de prefijo dinámico según el tipo de dato seleccionado.
 
 ### 4.2. Archivo Fuente en el Código
@@ -117,7 +117,7 @@ Modal interactivo deslizable que permite ingresar nuevos identificadores para se
 ## 5. Avisos de Estado Semánticos (`StatusNotice`)
 
 Banner ligero para informar sobre eventos de la aplicación sin bloquear la pantalla:
-* **Variantes Semánticas:** Éxito (`#10B981`), Información (`#285F8F`), Advertencia (`#F59E0B`), Error (`#EF4444`).
+* **Variantes Semánticas:** Éxito / Aceptar (`#10B981`), Información / Institucional (`#605B44` / `#403D2D`), Advertencia (`#F59E0B`), Error / Destructivo / Cerrar (`#EF4444`).
 * **Accesibilidad:** Envuelto en `Semantics(liveRegion: true)` con mensajes sanitizados que no leen secretos ni URLs sensibles en altavoz.
 
 * [Ver implementación en Flutter](file:///home/peterpad/Hackaton-FEE/app/lib/shared/presentation/status_notice.dart)
