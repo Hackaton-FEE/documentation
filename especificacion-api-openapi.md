@@ -2,7 +2,7 @@
 ## Backend Gateway: Osisn't Engine & Reputation Defense Shield
 **Versión de API:** `v1`  
 **Formato:** JSON / REST sobre TLS 1.3  
-**Autenticación:** `Authorization: Bearer <JWT>`  
+**Autenticación:** `Authorization: Bearer <JWT>` — emitido por el Módulo de Autenticación (passkeys FIDO2, sección 4). Sin nombre de usuario ni contraseña.
 
 ---
 
@@ -238,3 +238,45 @@
   }
 }
 ```
+
+---
+
+## 4. Módulo de Autenticación (Passkeys FIDO2 / WebAuthn)
+
+Registro e inicio de sesión sin nombre de usuario, correo ni contraseña. La
+biometría desbloquea una llave privada que vive en el Secure Enclave / Android
+Keystore; el servidor solo almacena un identificador aleatorio y llaves públicas.
+
+Cada flujo tiene dos pasos: `.../options` (el servidor entrega un
+`challenge_token` firmado y sin estado, válido 120 s) y `.../verify` (el cliente
+devuelve ese token junto con la respuesta del autenticador). El login es
+*usernameless*: `authentication/options` no envía `allowCredentials`.
+
+| Ruta | Descripción | Respuesta |
+| :--- | :--- | :--- |
+| `POST /api/v1/auth/passkey/registration/options` | Reto para crear una passkey | `200` `{ challenge_token, public_key }` |
+| `POST /api/v1/auth/passkey/registration/verify` | Verifica la passkey y **crea la cuenta** | `201` sesión |
+| `POST /api/v1/auth/passkey/authentication/options` | Reto para iniciar sesión | `200` `{ challenge_token, public_key }` |
+| `POST /api/v1/auth/passkey/authentication/verify` | Verifica y abre sesión | `200` sesión |
+| `POST /api/v1/auth/token/refresh` | Rota el refresh token | `200` sesión |
+| `POST /api/v1/auth/logout` | Revoca el refresh token | `204` |
+| `GET /api/v1/auth/me` | Resumen de la cuenta (requiere `Bearer`) | `200` |
+
+**Cuerpo de sesión** (`201`/`200`):
+
+```json
+{
+  "access_token": "<JWT, 1 h>",
+  "refresh_token": "<opaco, se rota en cada uso>",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "user": { "id": "9a8f02b1", "label": "Mi bóveda FEE" }
+}
+```
+
+**Errores** (RFC 7807): `invalid-challenge` (400), `invalid-credential` (400),
+`unknown-credential` (401), `invalid-session` (401), `rate-limited` (429).
+
+El contrato detallado, ejemplos para Flutter y los archivos de asociación de
+dominio (`/.well-known/assetlinks.json`, `/.well-known/apple-app-site-association`)
+están en `Hackaton-FEE/server` → `docs/auth-contract.md`.
