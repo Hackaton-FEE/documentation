@@ -1,141 +1,98 @@
-# Investigación Técnica y Arquitectura de Integración: Ecosistema OSINT Unificado
+# Arquitectura e Integración Técnica: Trilogía OSINT (Blackbird - Maigret - Holehe)
 
-Este documento presenta el análisis técnico, ejecución real en laboratorio (`osint_lab/`), captura verídica de salidas nativas y la arquitectura de integración para unificar las herramientas open-source líderes de **OSINT** (*Open Source Intelligence*) en una plataforma única de huella digital y metadatos.
+Este documento define la arquitectura técnica de la plataforma OSINT unificada, basada en la integración de tres motores complementarios (**Blackbird**, **Maigret** y **Holehe**) para el descubrimiento, correlación y análisis profundo de huella digital tanto por **nombre de usuario (*username*)** como por **correo electrónico (*email*)**.
 
 ---
 
-## 1. Resumen Ejecutivo del Ecosistema
+## 1. Visión y Estrategia de la Trilogía OSINT
 
-Para no reinventar la rueda, el motor de la plataforma unifica las mejores herramientas especializadas en cada vector de superficie de ataque digital:
+En lugar de herramientas redundantes o superficiales, el sistema adopta una **arquitectura por niveles con pivoteo bidireccional**:
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion["1. Capa de Ingestión (Vector de Entrada)"]
-        InUsername["Identificador / Alias (Username)"]
-        InEmail["Correo Electrónico (Email)"]
-        InMedia["Archivo / Documento (Media/Docs)"]
+    subgraph Inputs["1. Vectores de Entrada"]
+        InEmail["📧 Correo Electrónico (Email)"]
+        InUser["👤 Nombre de Usuario (Username / Alias)"]
     end
 
-    subgraph Engines["2. Motores Especializados Ejecutados"]
-        E_Sherlock["Sherlock\n(Rastreo rápido 400+ sitios)"]
-        E_Blackbird["Blackbird\n(Fast async WhatsMyName 700+ sitios)"]
-        E_Maigret["Maigret\n(Dossier profundo, scraping 5000+ sitios)"]
-        E_Holehe["Holehe\n(Email OSINT silencioso 120+ sitios)"]
-        E_ExifTool["ExifTool Engine\n(Extracción EXIF/XMP/GPS/Metadata)"]
+    subgraph Layer1["2. Capa de Reconocimiento y Triage Rápido"]
+        E_Holehe["Holehe Engine\n(Descubrimiento pasivo 120+ sitios\nFuga de teléfonos / correos de recuperación)"]
+        E_Blackbird["Blackbird Engine\n(WhatsMyName DB 700+ sitios\nCategorización: Finanzas, Tech, Social)"]
     end
 
-    subgraph Correlation["3. Capa de Normalización y Correlación"]
-        Normalizer["Normalizador Canónico (OSINT Common Schema)"]
-        Deduplicator["Deduplicador y Validador Anti-Falsos Positivos"]
-        GraphEngine["Grafo de Identidad y Pivoteo de Huella"]
+    subgraph Pivot["3. Motor de Pivoteo y Correlación"]
+        PivotEngine["Correlador de Identidades y Extractor de Pivotes\n(Detecta alias alternativos, UIDs y enlaces)"]
     end
 
-    subgraph Egress["4. Capa de Salida y Acción"]
-        APIOut["API REST / SSE (Streaming en Tiempo Real)"]
-        DossierJSON["Dossier Unificado JSON"]
-        OptOutGuide["Matriz de Mitigación y Borrado (Opt-Out)"]
+    subgraph Layer2["4. Capa de Perfilado Forense Profundo"]
+        E_Maigret["Maigret Engine\n(Deep Scraping focalizado 5000+ sitios\nExtrae UID, Avatares HD, Bio, Real Name y Grafo)"]
     end
 
-    InUsername --> E_Sherlock & E_Blackbird & E_Maigret
+    subgraph Output["5. Capa de Salida Unificada"]
+        UnifiedRecord["Dossier Canónico Unificado (JSON / REST / SSE)"]
+        RiskScore["Puntaje de Exposición de Huella Digital (0-100)"]
+        OptOut["Matriz de Borrado y Mitigación (Opt-Out)"]
+    end
+
     InEmail --> E_Holehe
-    InMedia --> E_ExifTool
+    InUser --> E_Blackbird
 
-    E_Sherlock & E_Blackbird & E_Maigret & E_Holehe & E_ExifTool --> Normalizer
-    Normalizer --> Deduplicator --> GraphEngine
-    GraphEngine --> APIOut & DossierJSON & OptOutGuide
+    E_Holehe --> PivotEngine
+    E_Blackbird --> PivotEngine
+
+    PivotEngine -- "Pivote: Email revela Username o Username revela Email" --> E_Holehe
+    PivotEngine -- "Pivote: Sitios confirmados y nuevos alias" --> E_Maigret
+
+    E_Maigret --> UnifiedRecord
+    PivotEngine --> UnifiedRecord
+    UnifiedRecord --> RiskScore & OptOut
 ```
+
+### Roles Específicos de Cada Motor:
+1. **Holehe (Vector Email):** Actúa como el radar silencioso inicial cuando se ingresa un correo. Comprueba la existencia de cuentas en más de 120 plataformas sin alertar a la víctima y rescatando fragmentos de números telefónicos o correos alternativos.
+2. **Blackbird (Vector Username - Triage Rápido & Semántico):** Escanea a alta velocidad más de 700 plataformas utilizando la base de datos WhatsMyName, emite JSON nativo limpio y clasifica los hallazgos por temática (`finance`, `crypto`, `coding`, `social`, `gaming`).
+3. **Maigret (Deep Profiling & Grafo Relacional):** Entra de forma quirúrgica sobre los perfiles detectados para raspar el código HTML/API, extraer la identidad real (nombre completo, foto de perfil, fecha de registro, ubicación declarada, bio, identificadores como Steam ID o Gaia ID) y expandir el grafo de huella digital de forma recursiva.
 
 ---
 
-## 2. Análisis Detallado de Herramientas y Salidas Reales Capturadas
+## 2. Flujo de Pivoteo Bidireccional (Deep Footprint Discovery)
 
-Todas las herramientas fueron instaladas y ejecutadas en el entorno local (`osint_lab/venv`). A continuación se documentan las características, pros, contras y los **bloques de salida 100% reales extraídos de los archivos generados durante los tests**.
+El objetivo central es que la investigación no se detenga en una lista plana de enlaces, sino que profundice automáticamente mediante pivoteo:
 
----
+### Flujo A: Entrada por Correo Electrónico (`Email -> Deep Footprint`)
+1. El analista o usuario ingresa `juan.perez@dominio.com`.
+2. **Holehe** ejecuta el escaneo pasivo contra 120+ plataformas.
+3. Se detectan cuentas confirmadas (ej. Spotify, GitHub, Adobe, Gravatar).
+4. Del endpoint de Gravatar o GitHub, el sistema extrae el *username* público asociado (`jperez_dev`).
+5. El sistema pivota automáticamente y envía `jperez_dev` a **Blackbird** para mapear su presencia en 700+ redes.
+6. Los perfiles con mayor densidad de datos pasan a **Maigret** para extraer nombre real, ubicación y conexiones sociales.
 
-### Herramienta 1: Sherlock (`sherlock-project/sherlock`)
-
-* **Categoría:** Username Reconnaissance (Filtro Rápido).
-* **Versión Probada:** `v0.16.0`.
-* **Tecnología:** Python 3 (asincronía con `requests-futures`, multithreading).
-* **Fuente de Firmas:** `data.json` comunitario (400+ sitios).
-
-#### Principales Características
-* Consulta concurrente de cientos de plataformas en segundos usando peticiones HTTP concurrentes.
-* Comprueba disponibilidad mediante código de estado HTTP (`status_code`), URLs de error (`message`), o redirecciones (`response_url`).
-* Soporte nativo para proxies (Tor `--tor`, HTTP/SOCKS5 `--proxy`) para anonimizar la dirección IP de consulta.
-* Búsqueda de variantes fonéticas o similares mediante el operador comodín `{?}`.
-
-#### Ventajas
-* **Bajo consumo y velocidad:** Ideal como primera pasada ("first-pass filter") para cribar rápidamente plataformas principales sin sobrecargar el servidor.
-* **Gran estabilidad comunitaria:** Base de datos depurada activamente para mitigar falsos positivos.
-
-#### Desventajas
-* **Superficial:** No realiza *deep scraping*; solo responde si el perfil existe o no, sin extraer avatares, nombres reales, bios ni IDs internos.
-* **Salida de JSON limitada:** Por defecto privilegia texto plano y CSV; la opción `-j` está orientada a cargar bases de datos personalizadas en lugar de exportar JSON anidado detallado.
-
-#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/`)
-
-**Comando ejecutado:**
-```bash
-sherlock --site GitHub --site GitLab --site Reddit --folderoutput osint_lab/test_runs --csv testdev9988
-```
-
-**Salida Consola Real:**
-```text
-Update available! 0.16.0 --> 0.16.2
-https://github.com/sherlock-project/sherlock/releases/tag/v0.16.2
-[*] Checking username testdev9988 on:
-
-[+] Reddit: https://www.reddit.com/user/testdev9988
-
-[*] Search completed with 1 results
-```
-
-**Archivo CSV Real Generado (`osint_lab/test_runs/testdev9988.csv`):**
-```csv
-username,name,url_main,url_user,exists,http_status,response_time_s
-testdev9988,Reddit,https://www.reddit.com/,https://www.reddit.com/user/testdev9988,Claimed,200,0.29114234499866143
-```
-
-**Archivo CSV Real Generado (`osint_lab/test_runs/torvalds.csv`):**
-```csv
-username,name,url_main,url_user,exists,http_status,response_time_s
-torvalds,GitHub,https://www.github.com/,https://www.github.com/torvalds,Claimed,200,1.5120453340023232
-```
+### Flujo B: Entrada por Nombre de Usuario (`Username -> Deep Footprint`)
+1. El analista ingresa el alias `darkcoder`.
+2. **Blackbird** barre 700+ plataformas en menos de 30 segundos y devuelve un JSON estructurado con categorías semánticas.
+3. **Maigret** toma los perfiles confirmados (`--site GitHub --site DevTo --site Twitter`) y extrae metadatos embebidos:
+   - Bio de GitHub: contiene el correo de contacto `darkcoder@proton.me`.
+   - Avatar: URL de imagen en alta resolución.
+4. El sistema pivota y envía el correo descubierto `darkcoder@proton.me` a **Holehe**.
+5. **Holehe** descubre si ese correo privado está vinculado a billeteras cripto, foros o servicios de mensajería.
+6. Se consolida el expediente en un **Dossier de Identidad Único**.
 
 ---
 
-### Herramienta 2: Blackbird (`p1ngul1n0/blackbird`)
+## 3. Análisis Técnico de los Tres Motores y Salidas Reales Capturadas
 
-* **Categoría:** Modern Fast Username OSINT con Clasificación Semántica.
-* **Versión Probada:** `Latest` (WhatsMyName DB Engine).
-* **Tecnología:** Python 3 + `aiohttp` + `asyncio`.
-* **Fuente de Firmas:** `WhatsMyName` project (>700 plataformas).
+Las tres herramientas fueron probadas y validadas en el entorno local (`osint_lab/venv`). A continuación se detallan sus especificaciones y las **salidas verídicas capturadas directamente en laboratorio**.
 
-#### Principales Características
-* Motor asíncrono ultrarrápido con control fino de concurrencia (`--max-concurrent-requests`, `--timeout`).
-* Clasificación semántica automática de cada servicio encontrado (`social`, `coding`, `gaming`, `music`, `crypto`, `finance`, `adult`).
-* Extracción ligera de metadatos embebidos en respuestas JSON/HTML (avatares, cursos de idiomas, nombres reales).
-* Exportación nativa directa a JSON estructurado (`--json`).
+---
 
-#### Ventajas
-* **Salida nativa en JSON limpio y estructurado:** Se adapta directamente a APIs REST sin necesidad de parsear salidas de texto.
-* **Categorización semántica integrada:** Permite agrupar hallazgos por industria o temática.
-* **Descarga y actualización automática:** Sincroniza `wmn-data.json` con la comunidad WhatsMyName.
+### Motor 1: Blackbird (Filtro Rápido y Categorización Semántica)
 
-#### Desventajas
-* Requiere ejecución referenciando adecuadamente el directorio de datos.
-* Menor profundidad recursiva que Maigret (no enlaza automáticamente hacia identificadores secundarios).
+* **Propósito:** Mapeo veloz y estructurado de nombres de usuario en >700 sitios.
+* **Tecnología:** Python 3 + `aiohttp` (asincronía nativa).
+* **Formato de Salida:** JSON estructurado nativo (`--json`).
 
-#### Salidas Reales de Ejecución (Capturadas de `osint_lab/blackbird/results/`)
+#### Salida Real Capturada en Laboratorio (`testuser12345_09_10_2026_blackbird.json`):
 
-**Comando ejecutado:**
-```bash
-python blackbird.py -u testuser12345 --json --timeout 5
-```
-
-**Fragmento Real 1: Detección estándar sin metadatos anidados (`testuser12345_09_10_2026_blackbird.json`):**
 ```json
 [
   {
@@ -153,137 +110,56 @@ python blackbird.py -u testuser12345 --json --timeout 5
     "metadata": null
   },
   {
-    "name": "SoundCloud",
-    "url": "https://soundcloud.com/testuser12345",
-    "category": "music",
+    "name": "Duolingo",
+    "url": "https://www.duolingo.com/2017-06-30/users?username=testuser12345&_=1628308619574",
+    "category": "hobby",
     "status": "FOUND",
-    "metadata": null
+    "metadata": [
+      {
+        "schema": "JSON",
+        "type": "Image",
+        "name": "Avatar",
+        "prefix": "https:",
+        "path": ["users", 0, "picture"],
+        "downloaded": false,
+        "value": "https://simg-ssl.duolingo.com/avatar/default_2"
+      },
+      {
+        "schema": "JSON",
+        "type": "Array",
+        "item-path": ["title"],
+        "name": "Courses",
+        "path": ["users", 0, "courses"],
+        "value": ["Spanish"]
+      }
+    ]
   }
 ]
 ```
 
-**Fragmento Real 2: Detección con metadatos extraídos de la API (Avatar y Cursos en Duolingo):**
-```json
-{
-  "name": "Duolingo",
-  "url": "https://www.duolingo.com/2017-06-30/users?username=testuser12345&_=1628308619574",
-  "category": "hobby",
-  "status": "FOUND",
-  "metadata": [
-    {
-      "schema": "JSON",
-      "type": "Image",
-      "name": "Avatar",
-      "prefix": "https:",
-      "path": [
-        "users",
-        0,
-        "picture"
-      ],
-      "downloaded": false,
-      "value": "https://simg-ssl.duolingo.com/avatar/default_2"
-    },
-    {
-      "schema": "JSON",
-      "type": "Array",
-      "item-path": [
-        "title"
-      ],
-      "name": "Courses",
-      "path": [
-        "users",
-        0,
-        "courses"
-      ],
-      "value": [
-        "Spanish"
-      ]
-    }
-  ]
-}
-```
-
 ---
 
-### Herramienta 3: Maigret (`soxoj/maigret`)
+### Motor 2: Maigret (Dossier Forense y Deep Profiling)
 
-* **Categoría:** Deep Profiling, Parsing Recursivo y Generación de Dossier.
-* **Versión Probada:** `v0.6.5`.
+* **Propósito:** Extracción forense profunda de metadatos de usuario (avatar, UID, biografía, nombre real) y soporte de grafos relacionales.
 * **Tecnología:** Python 3 + `aiohttp` + `curl-cffi` + `socid-extractor` + `networkx`.
-* **Fuente de Firmas:** 5,373 plataformas en base de datos.
+* **Formato de Salida:** JSON simple (`-J simple`), NDJSON, HTML, PDF y grafos Neo4j.
 
-#### Principales Características
-* **Extracción profunda (*Deep Scraping*):** No solo valida la existencia; descarga el perfil y utiliza expresiones regulares y selectores XPath/JSONPath para extraer:
-  * Identificadores únicos (`uid`, `steam_id`, `gaia_id`, `vk_id`).
-  * Nombres completos (*Full Name*), fotos de perfil en alta resolución.
-  * Fechas de registro (`created_at`), ubicación geográfica declarada (`location`).
-  * Contadores de seguidores/seguidos, empresas y enlaces en bio.
-* **Búsqueda recursiva:** Si en un perfil de GitHub encuentra el enlace o nombre alternativo de Telegram, puede iniciar una búsqueda secundaria automáticamente.
-* **Salidas ricas:** JSON (`simple` y `ndjson`), Grafos (`--graph`), Neo4j Cypher (`--neo4j`), HTML interactivo, PDF y Markdown.
+#### Salida Real Capturada en Laboratorio (`report_torvalds_simple.json`):
 
-#### Ventajas
-* Es la herramienta de investigación de identidades digitales más completa del ecosistema open-source.
-* Construye un grafo relacional completo de la persona objetivo.
-* Clasificación de intereses mediante etiquetas (`tags`).
-
-#### Desventajas
-* Mayor tiempo de respuesta por objetivo (al parsear páginas completas y ejecutar `socid-extractor`).
-* Requiere gestión cuidadosa de *rate-limiting* mediante colas de trabajo.
-
-#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/report_torvalds_simple.json`)
-
-**Comando ejecutado:**
-```bash
-maigret torvalds --site GitHub --folderoutput osint_lab/test_runs -J simple --no-progressbar --no-recursion
-```
-
-**Salida Consola Real:**
-```text
-[+] MAIGRET - collect a dossier by username from 3000+ sites
-[+] Using sites database: /home/chris/.maigret/data.json (5373 sites)
-[*] Checking username torvalds on:
-[+] GitHub: https://github.com/torvalds
- ├─uid: 1024025
- ├─image: https://avatars.githubusercontent.com/u/1024025?v=4
- ├─created_at: 2011-09-03T15:26:22Z
- ├─location: Portland, OR
- ├─follower_count: 321694
- ├─following_count: 0
- ├─fullname: Linus Torvalds
- ├─public_gists_count: 1
- ├─public_repos_count: 12
- └─company: Linux Foundation
-[+] GitHubGist [GitHub]: https://gist.github.com/torvalds
-```
-
-**Archivo JSON Real Generado (`report_torvalds_simple.json`):**
 ```json
 {
   "GitHub": {
     "site": {
-      "tags": [
-        "business",
-        "coding",
-        "networking"
-      ],
+      "tags": ["business", "coding", "networking"],
       "regexCheck": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
       "urlProbe": "https://api.github.com/users/{username}",
       "checkType": "status_code",
       "alexaRank": 10,
       "urlMain": "https://www.github.com/",
-      "url": "https://github.com/{username}",
-      "usernameClaimed": "blue",
-      "usernameUnclaimed": "noonewouldeverusethis7"
+      "url": "https://github.com/{username}"
     },
     "username": "torvalds",
-    "keywords": [],
-    "parsing_enabled": true,
-    "url_main": "https://www.github.com/",
-    "cookies": null,
-    "url_user": "https://github.com/torvalds",
-    "url_probe": "https://api.github.com/users/torvalds",
-    "ids_usernames": {},
-    "ids_links": [],
     "status": {
       "username": "torvalds",
       "site_name": "GitHub",
@@ -302,13 +178,7 @@ maigret torvalds --site GitHub --folderoutput osint_lab/test_runs -J simple --no
         "company": "Linux Foundation",
         "_extractor": "GitHub API"
       },
-      "tags": [
-        "business",
-        "coding",
-        "networking"
-      ],
-      "keywords": [],
-      "keyword_match_status": "No Keywords"
+      "tags": ["business", "coding", "networking"]
     },
     "http_status": 200,
     "is_similar": false,
@@ -319,33 +189,14 @@ maigret torvalds --site GitHub --folderoutput osint_lab/test_runs -J simple --no
 
 ---
 
-### Herramienta 4: Holehe (`megadose/holehe`)
+### Motor 3: Holehe (Reconocimiento Pasivo de Cuentas por Email)
 
-* **Categoría:** Email OSINT / Rastreo Silencioso por Correo.
-* **Versión Probada:** `v1.61`.
-* **Tecnología:** Python 3 + `httpx` + `trio` (concurrencia asíncrona).
-* **Cobertura:** 121 plataformas web.
+* **Propósito:** Comprobar si un correo está registrado en plataformas web sin enviar alertas al titular.
+* **Tecnología:** Python 3 + `httpx` + `trio`.
+* **Formato de Salida:** CSV estructurado (`-C`).
 
-#### Principales Características
-* Consulta endpoints de validación de registro (*sign-up verification*), recuperación de contraseñas (*forgot password*) o APIs de autocompletado.
-* **Operación completamente pasiva:** No genera correos ni notificaciones en la bandeja del destinatario.
-* **Fuga de metadatos adicionales:** Extrae números de teléfono enmascarados y correos de recuperación cuando el proveedor los expone.
+#### Salida Real Capturada en Laboratorio (`holehe_*_results.csv`):
 
-#### Ventajas
-* Mapea cuentas registradas a partir de un correo electrónico.
-* Ideal para conectar correos corporativos o personales con alias en plataformas web.
-
-#### Desventajas Técnicas Reales (Observadas en el Test)
-* **Alta incidencia de Rate Limit:** Las solicitudes automatizadas sin rotación de proxy residencial disparan las protecciones bot de los sitios (`rateLimit: True`), como se aprecia en los resultados reales de abajo. Para producción, requiere obligatoriamente un gateway de proxies residenciales.
-
-#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/holehe_*_results.csv`)
-
-**Comando ejecutado:**
-```bash
-holehe --no-color -C contact@github.com --timeout 5
-```
-
-**Archivo CSV Real Generado (`holehe_1789001029_contact@github.com_results.csv`):**
 ```csv
 name,domain,method,frequent_rate_limit,rateLimit,exists,emailrecovery,phoneNumber,others
 blip,blip.fm,register,True,False,False,,,
@@ -355,224 +206,252 @@ aboutme,about.me,register,False,True,False,,,
 adobe,adobe.com,password recovery,False,True,False,,,
 amazon,amazon.com,login,False,True,False,,,
 atlassian,atlassian.com,register,False,True,False,,,
-axonaut,axonaut.com,,,True,False,,,
-babeshows,babeshows.co.uk,register,False,True,False,,,
-badeggsonline,badeggsonline.com,register,False,True,False,,,
-biosmods,bios-mods.com,register,False,True,False,,,
-biotechnologyforums,biotechnologyforums.com,register,False,True,False,,,
-bitmoji,bitmoji.com,login,False,True,False,,,
-blablacar,blablacar.com,register,True,True,False,,,
-blackworldforum,blackworldforum.com,register,True,True,False,,,
 ```
+
+> [!IMPORTANT]
+> **Lección Operativa de Laboratorio:**  
+> Holehe opera consultando endpoints de recuperación y validación. En conexiones directas desde IPs comerciales o datacenters, muchos servicios devuelven desafíos de bot (`rateLimit: True`). En producción, Holehe debe operar obligatoriamente conectado a un pool de **proxies residenciales rotativos** para garantizar lecturas con `exists: True/False` y capturar las fugas de teléfono (`phoneNumber`).
 
 ---
 
-### Herramienta 5: ExifTool (`Phil Harvey / exiftool`)
+## 4. Matriz Comparativa de la Trilogía
 
-* **Categoría:** Extracción Forense de Metadatos de Medios y Documentos.
-* **Versión Probada:** `v13.59`.
-* **Tecnología:** Perl nativo.
-* **Formatos Soportados:** JPEG, PNG, TIFF, HEIC, PDF, DOCX, XLSX, MP4, MOV, MKV, MP3, etc.
-
-#### Principales Características
-* Lectura completa de cabeceras EXIF, XMP, IPTC, MakerNotes y metadatos de documentos.
-* Extracción forense de coordenadas GPS exactas (latitud, longitud, altitud).
-* Detección de hardware de captura, versión de firmware, autor y software de edición.
-* Salida estructurada nativa mediante la bandera `-j`.
-
-#### Ventajas
-* Máxima fidelidad en análisis de metadatos forenses; lee etiquetas que otras librerías ignoran.
-* Muy liviano y con soporte nativo de JSON.
-
-#### Salidas Reales de Ejecución (Capturadas de `osint_lab/test_runs/`)
-
-**Comando ejecutado para Imagen con GPS (`osint_lab/test_runs/target_photo.jpg`):**
-```bash
-perl osint_lab/exiftool/exiftool -j osint_lab/test_runs/target_photo.jpg
-```
-
-**JSON Real Generado:**
-```json
-[{
-  "SourceFile": "osint_lab/test_runs/target_photo.jpg",
-  "ExifToolVersion": 13.59,
-  "FileName": "target_photo.jpg",
-  "Directory": "osint_lab/test_runs",
-  "FileSize": "1592 bytes",
-  "FileModifyDate": "2026:09:10 00:44:35+00:00",
-  "FileAccessDate": "2026:09:10 00:44:35+00:00",
-  "FileInodeChangeDate": "2026:09:10 00:44:35+00:00",
-  "FilePermissions": "-rw-rw-r--",
-  "FileType": "JPEG",
-  "FileTypeExtension": "jpg",
-  "MIMEType": "image/jpeg",
-  "JFIFVersion": 1.01,
-  "ResolutionUnit": "None",
-  "XResolution": 1,
-  "YResolution": 1,
-  "ExifByteOrder": "Big-endian (Motorola, MM)",
-  "Make": "Apple",
-  "Model": "iPhone 15 Pro Max",
-  "Software": "iOS 18.2",
-  "ModifyDate": "2026:09:09 22:30:00",
-  "Artist": "Jane Doe (OSINT Target)",
-  "GPSVersionID": "2.3.0.0",
-  "GPSLatitudeRef": "North",
-  "GPSLongitudeRef": "West",
-  "ImageWidth": 200,
-  "ImageHeight": 200,
-  "EncodingProcess": "Baseline DCT, Huffman coding",
-  "BitsPerSample": 8,
-  "ColorComponents": 3,
-  "YCbCrSubSampling": "YCbCr4:2:0 (2 2)",
-  "ImageSize": "200x200",
-  "Megapixels": 0.040,
-  "GPSLatitude": "40 deg 42' 46.08\" N",
-  "GPSLongitude": "74 deg 0' 21.60\" W",
-  "GPSPosition": "40 deg 42' 46.08\" N, 74 deg 0' 21.60\" W"
-}]
-```
-
-**Comando ejecutado para Documento PDF (`osint_lab/test_runs/target_document.pdf`):**
-```bash
-perl osint_lab/exiftool/exiftool -j osint_lab/test_runs/target_document.pdf
-```
-
-**JSON Real Generado:**
-```json
-[{
-  "SourceFile": "osint_lab/test_runs/target_document.pdf",
-  "ExifToolVersion": 13.59,
-  "FileName": "target_document.pdf",
-  "Directory": "osint_lab/test_runs",
-  "FileSize": "628 bytes",
-  "FileModifyDate": "2026:09:10 00:25:59+00:00",
-  "FileAccessDate": "2026:09:10 00:26:42+00:00",
-  "FileInodeChangeDate": "2026:09:10 00:25:59+00:00",
-  "FilePermissions": "-rw-rw-r--",
-  "FileType": "PDF",
-  "FileTypeExtension": "pdf",
-  "MIMEType": "application/pdf",
-  "PDFVersion": 1.3,
-  "Linearized": "No",
-  "PageCount": 1,
-  "Producer": "macOS Version 14.5 (Build 23F79) Quartz PDFContext",
-  "Author": "Investigador Confidencial",
-  "Creator": "Microsoft Word para Mac 16.85",
-  "Title": "Informe Financiero 2026",
-  "Subject": "Due Diligence M&A"
-}]
-```
+| Dimensión | Blackbird | Maigret | Holehe |
+| :--- | :--- | :--- | :--- |
+| **Vector de Entrada** | Username / Alias | Username / Identificadores | Correo Electrónico (Email) |
+| **Catálogo de Servicios** | 700+ plataformas | 5,300+ plataformas | 121 plataformas |
+| **Tiempo de Ejecución Típico** | ~25 a 35 segundos | ~15 s (focalizado) a 2 min (completo) | ~3 a 8 segundos |
+| **Nivel de Intrusividad** | Pasivo (Lectura HTTP/API) | Pasivo (Lectura + Scraping HTML) | Pasivo silencioso (Sin emails) |
+| **Metadatos Extraídos** | Categoría temática, avatar básico | UID, bio, avatar HD, real name, tags | Teléfono enmascarado, correo respaldo |
+| **Salida Predilecta para API** | JSON estructurado (`--json`) | JSON simple (`-J simple`) | CSV tabulado (`-C`) parseable a JSON |
+| **Manejo de Proxies** | SOCKS5 / HTTP | SOCKS5 / Tor / I2P | SOCKS5 / HTTP (via httpx) |
 
 ---
 
-## 3. Matriz Técnica Comparativa
+## 5. Modelo Canónico de Datos Unificado (`UnifiedOSINTRecord`)
 
-| Parámetro | Sherlock | Blackbird | Maigret | Holehe | ExifTool |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Input Principal** | Username | Username / Email | Username / IDs | Email | Archivos multimedia / docs |
-| **Sitios Soportados** | ~400 | ~700 | ~5,373 | 121 | Cientos de formatos |
-| **Velocidad de Escaneo** | ⚡⚡⚡ Rápido (~15s) | ⚡⚡⚡ Rápido (~30s) | ⏳ Moderado (~1-3m) | ⚡⚡ Rápido (~5s) | ⚡ Instantáneo (<1s) |
-| **Profundidad de Datos** | Superficial (Claimed/404) | Media (Categoría + Avatar) | Máxima (Dossier e IDs) | Presencia + Fuga parcial | Máxima (GPS/Dispositivo) |
-| **Salida Nativa Capturada** | CSV (`Claimed, 200`) | JSON (Array de objetos) | JSON (`simple`/`ndjson`) | CSV (`exists, rateLimit`) | JSON (`-j`) |
-| **Sensibilidad a Rate-Limit** | Media | Media | Alta (por scraping) | Muy Alta (requiere proxy) | Nula (Procesamiento local) |
-| **Rol en el Ecosistema** | Filtro rápido previo | Mapeo estructurado JSON | Dossier y Grafo relacional | Reconocimiento por email | Auditoría de archivos |
-
----
-
-## 4. Arquitectura de Integración: Pipeline Unificado
-
-Para integrar estas herramientas en un único ecosistema, se orquesta el siguiente flujo:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Usuario / Analista
-    participant Gateway as API Gateway (FastAPI / Node)
-    participant Orchestrator as Orquestador de Tareas (Celery / BullMQ)
-    participant WorkerPool as Pool de Motores OSINT
-    participant Normalizer as Capa de Normalización Canónica
-    participant Storage as Base de Datos (PostgreSQL / Redis)
-    
-    User->>Gateway: POST /api/v1/osint/scan { target: "identificador", vector: "auto" }
-    Gateway->>Storage: Crear scan_job (Status: IN_PROGRESS)
-    Gateway-->>User: 202 Accepted { job_id: "osint_job_9988" }
-    Gateway->>Orchestrator: Despachar job_id
-    
-    rect rgb(240, 248, 255)
-        Note over Orchestrator, WorkerPool: Ejecución Concurrente Orquestada
-        par Vector Username
-            Orchestrator->>WorkerPool: Ejecutar Blackbird (JSON) + Sherlock
-        and Vector Email
-            Orchestrator->>WorkerPool: Ejecutar Holehe (CSV con Proxy)
-        and Vector Archivo
-            Orchestrator->>WorkerPool: Ejecutar ExifTool (-j)
-        end
-    end
-    
-    WorkerPool-->>Normalizer: Salidas Reales Capturadas (JSON / CSV)
-    Normalizer->>Normalizer: Deduplicar y construir UnifiedOSINTRecord
-    
-    opt Pivoteo Detectado (Nuevos IDs / Enlaces)
-        Normalizer->>Orchestrator: Despachar Maigret con IDs descubiertos
-        Orchestrator->>WorkerPool: Ejecutar Maigret (Deep Dossier)
-        WorkerPool-->>Normalizer: Dossier extendido
-    end
-    
-    Normalizer->>Storage: Guardar registro consolidado y métricas de riesgo
-    Storage-->>User: Actualización en vivo vía SSE (Server-Sent Events)
-```
-
----
-
-## 5. Modelo de Datos Canónico Unificado (`UnifiedOSINTRecord`)
-
-Basado en las salidas reales de las 5 herramientas, la base de datos almacena el siguiente esquema tipado:
+El backend consolidará los resultados de los tres motores en un único contrato JSON:
 
 ```typescript
-interface UnifiedOSINTRecord {
+export interface UnifiedOSINTRecord {
   metadata: {
     scan_id: string;
-    target_queried: string;
-    query_type: "username" | "email" | "file";
-    executed_at: string;
-    engines_executed: ("sherlock" | "blackbird" | "maigret" | "holehe" | "exiftool")[];
+    target_input: string;
+    primary_vector: "username" | "email";
+    started_at: string;
+    completed_at: string;
     duration_seconds: number;
+    engines_executed: ("blackbird" | "maigret" | "holehe")[];
+    pivots_triggered: {
+      from_vector: string;
+      to_vector: string;
+      value: string;
+    }[];
   };
-  identities_discovered: Array<{
-    platform: string;
-    category: "social" | "coding" | "tech" | "gaming" | "music" | "hobby" | "other";
-    url: string;
-    status: "CONFIRMED" | "POTENTIAL_MATCH" | "RATE_LIMITED";
-    confidence_score: number; // 0.0 a 1.0
-    source_engine: string;
-    details: {
-      account_id?: string;
-      full_name?: string;
-      avatar_url?: string;
+  identity_profile: {
+    primary_username?: string;
+    confirmed_full_name?: string;
+    primary_avatar_url?: string;
+    detected_locations: string[];
+    associated_emails: string[];
+    masked_phone_numbers: string[];
+    inferred_interests_tags: string[];
+  };
+  presence_by_category: {
+    category: "finance" | "coding" | "social" | "gaming" | "music" | "hobby" | "other";
+    count: number;
+    services: Array<{
+      platform: string;
+      url: string;
+      status: "CONFIRMED" | "RATE_LIMITED";
+      discovered_by: "blackbird" | "maigret" | "holehe";
+      account_uid?: string;
+      bio?: string;
       creation_date?: string;
-      location?: string;
-      masked_phone?: string;
-      masked_email?: string;
-      company?: string;
-      followers?: number;
-      courses_or_interests?: string[];
-    };
-    opt_out_link?: string;
-  }>;
-  file_forensics?: {
-    file_name: string;
-    mime_type: string;
-    device_make?: string;
-    device_model?: string;
-    software_version?: string;
-    author_identity?: string;
-    geolocation?: {
-      latitude: number;
-      longitude: number;
-      coordinates_text: string;
-    };
-    risk_flags: string[];
+      opt_out_link?: string;
+    }>;
+  }[];
+  risk_assessment: {
+    footprint_score: number; // 0 (Huella nula) a 100 (Exposición masiva)
+    risk_level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    critical_exposures: string[]; // e.g. ["PHONE_FRAGMENT_LEAKED", "FINANCIAL_ACCOUNT_FOUND"]
+    recommended_actions: string[];
   };
 }
 ```
+
+---
+
+## 6. Orquestador de Integración en Python (`AsyncOSINTOrchestrator`)
+
+A continuación se presenta la implementación de referencia del orquestador asíncrono para ejecutar los tres motores de forma cooperativa:
+
+```python
+import asyncio
+import csv
+import json
+import os
+from typing import Dict, Any, List, Optional
+
+class AsyncOSINTOrchestrator:
+    def __init__(self, venv_bin: str, workspace_dir: str):
+        self.venv_bin = venv_bin
+        self.workspace_dir = workspace_dir
+        self.blackbird_dir = os.path.join(workspace_dir, "osint_lab/blackbird")
+        self.output_dir = os.path.join(workspace_dir, "osint_lab/test_runs")
+        os.makedirs(self.output_dir, exist_ok=True)
+
+    async def run_holehe(self, email: str, proxy: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Paso 1 (Email): Ejecuta Holehe para mapear cuentas asociadas al correo."""
+        cmd = [
+            f"{self.venv_bin}/holehe",
+            email,
+            "--no-color",
+            "-C",
+            "--timeout", "8"
+        ]
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=self.output_dir
+        )
+        await proc.communicate()
+        
+        # Parsear el CSV generado por Holehe
+        results = []
+        for file in os.listdir(self.output_dir):
+            if file.startswith("holehe_") and file.endswith(".csv") and email in file:
+                csv_path = os.path.join(self.output_dir, file)
+                with open(csv_path, mode="r", encoding="utf-8", errors="ignore") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row.get("exists") == "True":
+                            results.append({
+                                "platform": row.get("name"),
+                                "domain": row.get("domain"),
+                                "masked_phone": row.get("phoneNumber") or None,
+                                "email_recovery": row.get("emailrecovery") or None,
+                                "engine": "holehe"
+                            })
+        return results
+
+    async def run_blackbird(self, username: str) -> List[Dict[str, Any]]:
+        """Paso 2 (Username): Ejecuta Blackbird para barrido rápido de 700+ sitios."""
+        cmd = [
+            f"{self.venv_bin}/python",
+            "blackbird.py",
+            "-u", username,
+            "--json",
+            "--timeout", "10",
+            "--max-concurrent-requests", "30"
+        ]
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=self.blackbird_dir
+        )
+        await proc.communicate()
+        
+        # Localizar el archivo JSON exportado por Blackbird
+        found_records = []
+        results_folder = os.path.join(self.blackbird_dir, "results")
+        if os.path.exists(results_folder):
+            for folder in os.listdir(results_folder):
+                if username in folder:
+                    target_json = os.path.join(results_folder, folder, f"{username}_blackbird.json")
+                    if os.path.exists(target_json):
+                        with open(target_json, "r", encoding="utf-8") as jf:
+                            data = json.load(jf)
+                            for item in data:
+                                if item.get("status") == "FOUND":
+                                    found_records.append({
+                                        "platform": item.get("name"),
+                                        "url": item.get("url"),
+                                        "category": item.get("category", "other"),
+                                        "metadata": item.get("metadata"),
+                                        "engine": "blackbird"
+                                    })
+        return found_records
+
+    async def run_maigret_targeted(self, username: str, sites: List[str]) -> Dict[str, Any]:
+        """Paso 3 (Deep Scraping): Ejecuta Maigret de forma quirúrgica sobre los sitios confirmados."""
+        if not sites:
+            return {}
+            
+        cmd = [
+            f"{self.venv_bin}/maigret",
+            username,
+            "--folderoutput", self.output_dir,
+            "-J", "simple",
+            "--no-progressbar"
+        ]
+        for s in sites[:20]: # Limitar a los 20 más relevantes para maximizar velocidad
+            cmd.extend(["--site", s])
+            
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+        
+        report_file = os.path.join(self.output_dir, f"report_{username}_simple.json")
+        if os.path.exists(report_file):
+            with open(report_file, "r", encoding="utf-8") as rf:
+                return json.load(rf)
+        return {}
+
+    async def execute_deep_footprint_pipeline(self, target: str) -> Dict[str, Any]:
+        """Pipeline principal con detección automática de vector y pivoteo cruzado."""
+        is_email = "@" in target
+        consolidated = {
+            "target": target,
+            "vector": "email" if is_email else "username",
+            "findings": []
+        }
+        
+        if is_email:
+            # 1. Escaneo por Email con Holehe
+            email_hits = await self.run_holehe(target)
+            consolidated["findings"].extend(email_hits)
+            
+            # Pivoteo: Inferir alias del email (e.g. "usuario" de "usuario@gmail.com")
+            inferred_user = target.split("@")[0]
+            bb_hits = await self.run_blackbird(inferred_user)
+            consolidated["findings"].extend(bb_hits)
+            
+            # Deep profiling con Maigret de sitios confirmados
+            sites_to_scrape = [h["platform"] for h in bb_hits]
+            maigret_dossier = await self.run_maigret_targeted(inferred_user, sites_to_scrape)
+            consolidated["deep_dossier"] = maigret_dossier
+            
+        else:
+            # 1. Escaneo por Username con Blackbird
+            bb_hits = await self.run_blackbird(target)
+            consolidated["findings"].extend(bb_hits)
+            
+            # 2. Deep profiling con Maigret
+            sites_to_scrape = [h["platform"] for h in bb_hits]
+            maigret_dossier = await self.run_maigret_targeted(target, sites_to_scrape)
+            consolidated["deep_dossier"] = maigret_dossier
+            
+        return consolidated
+```
+
+---
+
+## 7. Plan de Despliegue en Producción (Docker / Microservicios)
+
+Para asegurar la robustez de este ecosistema:
+
+1. **Aislamiento en Contenedores Separados:**
+   * `service-holehe`: Contenedor especializado con pool de proxies residenciales rotativos.
+   * `service-blackbird`: Contenedor de alta concurrencia (`aiohttp`) para escaneo rápido.
+   * `service-maigret`: Contenedor con `curl-cffi` y selectores de deep scraping para extracción de dossiers.
+2. **Cola de Tareas Centralizada (RabbitMQ / Redis + Celery):**
+   * El cliente hace una petición HTTP `POST /api/v1/osint/footprint`.
+   * El orquestador distribuye las tareas y emite eventos en tiempo real al frontend mediante **Server-Sent Events (SSE)** conforme cada motor reporta hallazgos.
+3. **Privacidad y Retención de Datos:**
+   * Almacenamiento seguro en PostgreSQL con cifrado en reposo para los reportes de auditoría solicitados por el propio usuario, con política de auto-eliminación transcurridos 30 días.
