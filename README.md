@@ -1,85 +1,98 @@
-# Repositorio de Investigacion: Valores Organizacionales de FEE y Universidad de la Libertad
+# Osisnt
 
-Este repositorio esta dedicado exclusivamente a la investigacion, analisis conceptual e ideacion sobre los valores organizacionales y de cultura empresarial de dos instituciones emblemáticas en la promocion de la libertad:
+Osisnt is a mobile app that helps people discover their public digital footprint and make informed choices about their privacy.
 
-1. **Foundation for Economic Education (FEE)**
-2. **Universidad de la Libertad (UL)**
+Built by **Team Ruaj** for the **FEE Mexico City Hackathon**. This repository is the starting point for understanding the project, finding its source code, and exploring the product research and design.
 
----
+**[Frontend: Flutter app](https://github.com/Hackaton-FEE/app)** · **[Backend: FastAPI server](https://github.com/Hackaton-FEE/server)** · **[Project documentation](https://github.com/Hackaton-FEE/documentation)**
 
-## 🎯 Objetivo de la Investigacion
-Analizar a profundidad las misiones, visiones, principios rectores y valores corporativos de ambas organizaciones, destacando como conceptualizan la **libertad**, el **emprendimiento**, la **responsabilidad individual** y la **innovacion educativa**, asi como la forma en que traducen estos ideales en su cultura y operacion diaria.
+## Start here
 
----
+| Repository | What you will find | Where to start |
+| --- | --- | --- |
+| **[documentation](https://github.com/Hackaton-FEE/documentation)** | Project overview, product vision, design system, and research. | This README, then the [document guide](#document-guide). |
+| **[app — frontend](https://github.com/Hackaton-FEE/app)** | Flutter mobile client: sign-in, digital-footprint results, GuardAI interface, and local privacy cases. | [Setup and development](https://github.com/Hackaton-FEE/app#readme), [architecture](https://github.com/Hackaton-FEE/app/blob/main/docs/architecture.md), and [testing access](https://github.com/Hackaton-FEE/app/blob/main/docs/testing-access.md). |
+| **[server — backend](https://github.com/Hackaton-FEE/server)** | Python/FastAPI API: authentication, OSINT search orchestration, scan persistence, and the assistant endpoint. | [Integration status](https://github.com/Hackaton-FEE/server/blob/main/docs/backend-consolidation-20260911.md), [authentication contract](https://github.com/Hackaton-FEE/server/blob/main/docs/auth-contract.md), and [API routes](https://github.com/Hackaton-FEE/server/tree/main/src/fee_server/api/v1). |
 
-## 📂 Estructura de Documentos en este Repositorio
+To run or contribute to the software, use the setup and contribution instructions in the corresponding code repository. Cloning `documentation` gives you the documents and design assets; the frontend and backend are separate repositories.
 
-### 🏗️ Estándares de Ingeniería de Software (Documentación Técnica Formal)
-| Estándar / Tipo | Archivo | Descripción |
-| :--- | :--- | :--- |
-| **SRS (ISO/IEC/IEEE 29148)** | 📋 [**`especificacion-requisitos-software-srs.md`**](./especificacion-requisitos-software-srs.md) | **Especificación de Requisitos de Software:** Requisitos funcionales (RF), no funcionales (RNF), historias de usuario BDD (Given/When/Then) y matriz MoSCoW para Osisn't y Panic Button. |
-| **SAD (ISO/IEC/IEEE 42010)** | 🏛️ [**`arquitectura-software-sad-c4.md`**](./arquitectura-software-sad-c4.md) | **Documento de Arquitectura de Software:** Diagramas C4 (Contexto, Contenedores, Componentes), ADRs (Decisiones Arquitectónicas) y cadena de custodia forense OpenTimestamps. |
-| **API Contract (OpenAPI 3.1)** | 🔌 [**`especificacion-api-openapi.md`**](./especificacion-api-openapi.md) | **Especificación de APIs y Contratos:** Endpoints REST/JSON para escaneos Osisn't, ingesta Share Sheet, firma biométrica LPOA y seguimiento de desindexación Google/Meta. |
-| **Data Model & Privacy** | 🗄️ [**`modelo-datos-y-privacidad-erd.md`**](./modelo-datos-y-privacidad-erd.md) | **Modelo de Datos y ERD:** Esquema relacional en PostgreSQL/Supabase, diccionario de datos, retención efímera de 48h y almacenamiento Zero-Knowledge. |
-| **QA & Security (ISO 29119)** | 🧪 [**`plan-pruebas-qa-seguridad.md`**](./plan-pruebas-qa-seguridad.md) | **Plan de Pruebas y QA:** Pirámide de pruebas automatizadas, mocks para APIs de OSINT, matriz de seguridad OWASP Mobile & API Top 10 y checklist para el Demo. |
-| **Auth & FIDO2 (WebAuthn)** | 🔑 [**`estrategia-autenticacion-passkeys-biometria.md`**](./estrategia-autenticacion-passkeys-biometria.md) | **Estrategia de Autenticación:** Passkeys (FIDO2), biometría en Secure Enclave, bóveda de hardware y onboarding progresivo (cero cuentas para Osisn't). |
+## What the prototype does
 
----
+The current implementation focuses on helping a person review their own public information:
 
-### 📱 Propuesta de Producto y Módulos de la Suite
-| Archivo | Descripción |
-| :--- | :--- |
-| ⭐ **[`concepto-central-plataforma.md`](./concepto-central-plataforma.md)** | **[DOCUMENTO CENTRAL DE TRABAJO]** Propuesta y arquitectura conceptual de la **Aplicación Móvil**: defensa de reputación, Share Sheet nativo, desindexación en Google/Meta y modelo de agente autorizado. |
-| 🛡️ **[`osisnt-interfaz-huella-digital.md`](./osisnt-interfaz-huella-digital.md)** | **[MÓDULO OSISN'T]** Interfaz amigable y digestible de huella digital: transforma OSINT crudo en un dashboard visual, Exposure Score y remediación asistida en 1 clic (JustDelete.me, Eraser, etc.). |
-| 🎨 **[`design-system/`](./design-system/README.md)** | **[SISTEMA DE DISEÑO & TOKENS]** Guía integral de colorimetría semántica, psicología anti-pánico, escala tipográfica, métodos de experiencia de usuario (Calm Security UX) y especificación de componentes para la app Flutter. |
-| 👤 [`persona.md`](./persona.md) | Definición de Persona / Arquetipo de usuario (**Luisa Alfonsa Castilleja Peugnet**) y recorrido ante la plataforma. |
+- **Discover:** provide your email address, usernames, and phone number to review your digital footprint through the backend.
+- **Review:** inspect available findings, source links, scan progress, and coverage information in the mobile app.
+- **Organize:** save links and notes as local privacy cases, then edit, search, archive, or restore them.
+- **Ask GuardAI:** use the assistant interface when a real backend AI provider is configured. Availability depends on the server configuration.
 
----
+Android is the current validated mobile target. The codebase also contains iOS configuration, which requires additional platform setup and validation.
 
-### 🔬 Investigación Técnica y Ciberdefensa
-| Archivo | Descripción |
-| :--- | :--- |
-| 📄 [`herramientas-huella-digital.md`](./herramientas-huella-digital.md) | Análisis técnico de 5 herramientas open-source para búsqueda (OSINT) y borrado/mitigación (Sherlock, Holehe, Maigret, Eraser, JustDelete.me). |
-| 📄 [`analisis-tecnico-endpoints-headers-osint.md`](./analisis-tecnico-endpoints-headers-osint.md) | Análisis técnico profundo sobre el funcionamiento interno de herramientas OSINT, explotación de endpoints web/APIs y extracción de cabeceras HTTP. |
-| 📄 [`defensa-contra-osint-opsec.md`](./defensa-contra-osint-opsec.md) | Análisis de estrategias de Counter-OSINT, higiene digital, OPSEC y defensas técnicas contra el perfilado masivo. |
+A matching account is a lead to review, not proof of ownership. Search results can be incomplete. Automated content removal, platform takedowns, and sending privacy requests are future work; local case status does not indicate that an external organization received or acted on a request.
 
----
-
-### 🏛️ Fundamentos Filosóficos y Valores Organizacionales
-| Archivo | Descripción |
-| :--- | :--- |
-| 📄 [`fee-valores-organizacionales.md`](./fee-valores-organizacionales.md) | Análisis exhaustivo de FEE: historia, principios de Leonard Read, valores corporativos y cultura digital. |
-| 📄 [`universidad-de-la-libertad-valores.md`](./universidad-de-la-libertad-valores.md) | Análisis detallado de la Universidad de la Libertad: modelo educativo de Ricardo Salinas Pliego, valores empresariales y hub de emprendimiento. |
-| 📄 [`comparativa-y-sinergias.md`](./comparativa-y-sinergias.md) | Matriz comparativa, convergencias filosóficas, sinergias y conceptos clave unificados para ambas instituciones. |
-| 📄 [`ciberseguridad-finanzas-y-valores.md`](./ciberseguridad-finanzas-y-valores.md) | Análisis y propuesta sobre cómo la Ciberseguridad y la Privacidad se alinean con la propiedad privada y la resiliencia de negocios. |
-
----
-
-## 🔑 Conceptos Clave Destacados
+## How the parts work together
 
 ```mermaid
-graph TD
-    subgraph Ecosistema de Libertad y Emprendimiento
-        A[Libertad Individual & Autonomía] --> B[Creación de Valor & Libre Mercado]
-        B --> C[Responsabilidad Personal & Carácter Moral]
-        C --> D[Emprendimiento & Pensamiento Crítico]
-        D --> E[Educación Disruptiva / Phygital]
-    end
+flowchart LR
+    App["Flutter mobile app"] -->|Authenticated requests| API["FastAPI backend"]
+    API -->|Searches| OSINT["OSINT tools and external sources"]
+    API -->|When configured| AI["AI provider for GuardAI"]
+    App -->|Save links and notes| Cases["Local privacy cases"]
 ```
 
-### 1. Libertad Individual como Pilar Moral y Practico
-La libertad no es solo un concepto politico o economico, sino una filosofia de vida integral basada en el respeto irrestricto al individuo y la eleccion voluntaria.
+The frontend presents findings and manages local cases. The backend handles authentication, coordinates search tools, stores scan state and findings, and returns results to the app. Search adapters include Blackbird, Maigret, Holehe, and Ignorant; real execution depends on the supplied identifiers and server configuration.
 
-### 2. Emprendimiento como Agente de Cambio Social
-Tanto en FEE como en la UL, el emprendedor es visto como el heroe moderno que resuelve problemas reales, genera prosperidad y desafia las estructuras obsoletas mediante la innovacion.
+Searches send the supplied identifiers to the server and consult external sources. Local case notes stay in the app's device storage. When GuardAI is enabled, submitted conversation content and the selected report context are processed by the configured AI provider. See the implementation repositories for the detailed data flow and configuration.
 
-### 3. Autoperfeccionamiento y Responsabilidad (Self-Ownership)
-Rechazo explicito al paternalismo y a la cultura de la victimizacion. Se fomenta la disciplina personal, la etica de trabajo y la asuncion de las consecuencias de las propias decisiones.
+## Document guide
 
-### 4. Innovacion Educativa por Persuasion y Experiencia
-FEE aporta el modelo de persuasion etica y divulgacion de alto impacto digital, mientras que la Universidad de la Libertad aporta el modelo phygital, interactivo y guiado por empresarios en activo.
+Most detailed documents below are in Spanish. They preserve the team's research and design work, including ideas that go beyond the current prototype. **A proposal in these documents is not a claim that a feature has shipped.** For implemented behavior, follow the code and tests in [app](https://github.com/Hackaton-FEE/app) and [server](https://github.com/Hackaton-FEE/server); some early specifications and setup summaries predate the integration.
 
----
+### Product and presentation
 
-## 📌 Proximos Pasos (Ideacion)
-Este material sirve como base conceptual para posteriores desarrollos de proyectos, estrategias de comunicacion o plataformas tecnologicas orientadas a difundir y potenciar estos valores.
+| Document | Purpose |
+| --- | --- |
+| [Product concept](concepto-central-plataforma.md) | Broader product vision and proposed privacy workflows. |
+| [Digital-footprint experience](osisnt-interfaz-huella-digital.md) | Proposed discovery, review, and follow-up experience. |
+| [User persona](persona.md) | User needs and a proposed product journey. |
+| [Pitch script](pitch.md) | Hackathon presentation draft; wording and roadmap may differ from the current implementation. |
+
+### Design
+
+| Document | Purpose |
+| --- | --- |
+| [Design system](design-system/README.md) | Visual language, typography, components, and experience guidelines. |
+| [Logo and animation assets](design-system/logo/README.md) | Brand assets and the loading animation. |
+
+### Technical design proposals
+
+These files describe intended requirements and architecture, including earlier technology choices. They are design references; use the code repositories for the current API and implementation.
+
+| Document | Purpose |
+| --- | --- |
+| [Software requirements](especificacion-requisitos-software-srs.md) | Proposed functional requirements and priorities. |
+| [Architecture and C4 diagrams](arquitectura-software-sad-c4.md) | Early architecture proposal and design decisions. |
+| [API specification](especificacion-api-openapi.md) | Conceptual API contract, including future workflows. |
+| [Data model and privacy](modelo-datos-y-privacidad-erd.md) | Proposed data structures, retention, and privacy design. |
+| [QA and security plan](plan-pruebas-qa-seguridad.md) | Planned test strategy and review criteria. |
+| [Passkeys and biometrics](estrategia-autenticacion-passkeys-biometria.md) | Authentication design research. |
+
+### Research and project foundations
+
+| Document | Purpose |
+| --- | --- |
+| [Digital-footprint tools](herramientas-huella-digital.md) | Comparison of discovery and privacy tools. |
+| [OSINT integration research](investigacion-e-integracion-herramientas-osint.md) | Tool experiments and integration considerations. |
+| [OSINT endpoints and headers](analisis-tecnico-endpoints-headers-osint.md) | Technical background on discovery mechanisms. |
+| [Counter-OSINT and digital hygiene](defensa-contra-osint-opsec.md) | Research on reducing public exposure. |
+| [FEE values](fee-valores-organizacionales.md) | Background on individual liberty and entrepreneurship. |
+| [Universidad de la Libertad values](universidad-de-la-libertad-valores.md) | Institutional and educational context. |
+| [Shared principles](comparativa-y-sinergias.md) | Connections between the two organizations' values. |
+| [Privacy, cybersecurity, and values](ciberseguridad-finanzas-y-valores.md) | How the project relates to personal agency and responsibility. |
+
+## Contribute
+
+- **Documentation or design:** open an [issue](https://github.com/Hackaton-FEE/documentation/issues) or pull request in this repository.
+- **Mobile app:** follow the [frontend contribution guide](https://github.com/Hackaton-FEE/app/blob/main/CONTRIBUTING.md).
+- **API, authentication, or search engines:** follow the [backend contribution guide](https://github.com/Hackaton-FEE/server/blob/main/CONTRIBUTING.md).
+
+Keep descriptions of implemented behavior, experiments, and future plans distinct so readers can understand what they can use today.

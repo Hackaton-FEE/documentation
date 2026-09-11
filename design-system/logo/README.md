@@ -53,7 +53,7 @@ documentation/design-system/logo/
 ```
 
 > [!NOTE]
-> Esta misma estructura se encuentra replicada en [`app/assets/logo/`](file:///home/peterpad/Hackaton-FEE/app/assets/logo/) y declarada en [`app/pubspec.yaml`](file:///home/peterpad/Hackaton-FEE/app/pubspec.yaml).
+> Esta misma estructura se encuentra replicada en [`app/assets/logo/`](https://github.com/Hackaton-FEE/app/tree/main/assets/logo) y declarada en [`app/pubspec.yaml`](https://github.com/Hackaton-FEE/app/blob/main/pubspec.yaml).
 
 ---
 

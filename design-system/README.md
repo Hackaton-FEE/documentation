@@ -34,10 +34,10 @@ Este módulo está organizado en especificaciones independientes pero altamente 
 ## 🚀 Implementación en el Código de la Aplicación
 
 Los tokens definidos en este sistema son la fuente de verdad que alimenta directamente el tema de Flutter en:
-- [Tema Global Flutter](file:///home/peterpad/Hackaton-FEE/app/lib/app/theme.dart)
-- [Dashboard de Huella Digital](file:///home/peterpad/Hackaton-FEE/app/lib/features/footprint/presentation/dashboard_page.dart)
-- [Medidor de Exposición](file:///home/peterpad/Hackaton-FEE/app/lib/features/footprint/presentation/widgets/exposure_gauge.dart)
-- [Tarjetas de Hallazgos](file:///home/peterpad/Hackaton-FEE/app/lib/features/footprint/presentation/widgets/finding_card.dart)
+- [Tema Global Flutter](https://github.com/Hackaton-FEE/app/blob/main/lib/app/theme.dart)
+- [Dashboard de Huella Digital](https://github.com/Hackaton-FEE/app/blob/main/lib/features/footprint/presentation/dashboard_page.dart)
+- [Medidor de Exposición](https://github.com/Hackaton-FEE/app/blob/main/lib/features/footprint/presentation/widgets/exposure_gauge.dart)
+- [Tarjetas de Hallazgos](https://github.com/Hackaton-FEE/app/blob/main/lib/features/footprint/presentation/widgets/finding_card.dart)
 
 ### Mapeo Rápido de Tokens a Flutter (`ThemeData`)
 
